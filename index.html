@@ -1,1 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OUTGUNNED — Character Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e8192c;
+    --dark-red: #9e0d1c;
+    --black: #0a0a0a;
+    --dark: #111111;
+    --panel: #181818;
+    --border: #2a2a2a;
+    --text: #e8e0d4;
+    --muted: #6b6560;
+    --accent: #f5c842;
+    --white: #ffffff;
+  }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* Header */
+  .header {
+    background: var(--red);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: 'OUTGUNNED';
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 220px;
+    color: rgba(0,0,0,0.12);
+    right: -20px;
+    top: -40px;
+    line-height: 1;
+    pointer-events: none;
+    letter-spacing: -5px;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 4px;
+    color: white;
+    line-height: 1;
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+  }
+
+  .header-badge {
+    background: var(--black);
+    padding: 10px 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(245,200,66,0.3);
+  }
+
+  /* Save bar */
+  .save-bar {
+    background: var(--dark);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 36px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .save-status {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .save-status.saved { color: #4caf50; }
+  .save-status.unsaved { color: var(--accent); }
+
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--red);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--dark-red); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+  /* Main layout */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  .full-width { grid-column: 1 / -1; }
+
+  /* Panel */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--red);
+  }
+
+  .panel-header {
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--red);
+  }
+
+  .panel-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .panel-body { padding: 16px 20px; }
+
+  /* Fields */
+  .field-group {
+    display: grid;
+    gap: 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  input[type="text"], input[type="number"], textarea, select {
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid #333;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--red);
+    border-bottom-color: var(--red);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+  }
+
+  select option { background: var(--dark); }
+
+  .col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .col-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .col-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+  /* Identity panel — special big name */
+  .hero-name-input {
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 32px !important;
+    padding: 6px 12px !important;
+    color: var(--white) !important;
+    letter-spacing: 2px;
+  }
+
+  /* Attributes & Skills */
+  .attr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .attr-block {
+    background: var(--black);
+    border: 1px solid var(--border);
+    padding: 12px;
+  }
+
+  .attr-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .attr-score {
+    width: 36px !important;
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 20px !important;
+    padding: 2px 4px !important;
+    color: var(--accent) !important;
+  }
+
+  .skills-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .skill-score {
+    width: 32px !important;
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 14px !important;
+    padding: 3px !important;
+    flex-shrink: 0;
+  }
+
+  .skill-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  /* Grit tracker */
+  .grit-track {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .grit-box {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--red);
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .grit-box.filled {
+    background: var(--red);
+  }
+
+  .grit-box:hover { border-color: white; }
+
+  .grit-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* Dice trackers */
+  .dice-track {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .die {
+    width: 36px;
+    height: 36px;
+    border: 2px solid #444;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--muted);
+    position: relative;
+  }
+
+  .die::before {
+    content: '⬡';
+    font-size: 28px;
+    position: absolute;
+    opacity: 0.1;
+  }
+
+  .die.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(245, 200, 66, 0.08);
+  }
+
+  .die.used {
+    border-color: #333;
+    color: #333;
+    background: transparent;
+    text-decoration: line-through;
+  }
+
+  /* Status effects */
+  .status-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .status-chip {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  .status-chip.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+
+  /* Gear list */
+  .gear-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .gear-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .gear-item input { flex: 1; }
+
+  .gear-delete {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 8px 10px;
+    font-size: 14px;
+    transition: all 0.1s;
+  }
+  .gear-delete:hover { border-color: var(--red); color: var(--red); }
+
+  .add-btn {
+    margin-top: 8px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    padding: 8px;
+    width: 100%;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .add-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Feats */
+  .feat-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .feat-item {
+    display: flex;
+    gap: 8px;
+  }
+
+  .feat-item .feat-name { width: 160px; flex-shrink: 0; }
+  .feat-item .feat-desc { flex: 1; }
+
+  /* Contacts */
+  .contact-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .contact-item {
+    display: grid;
+    grid-template-columns: 100px 80px 1fr 34px;
+    gap: 6px;
+    align-items: start;
+  }
+
+  .contact-type-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    margin-bottom: 4px;
+    display: inline-block;
+  }
+
+  .badge-ally { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+  .badge-rival { background: rgba(232, 25, 44, 0.2); color: var(--red); }
+  .badge-contact { background: rgba(245, 200, 66, 0.15); color: var(--accent); }
+
+  /* Diagonal accent */
+  .diag-accent {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, transparent 50%, rgba(232,25,44,0.08) 50%);
+    pointer-events: none;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+
+  /* Portrait */
+  .portrait-wrap {
+    width: 140px;
+    flex-shrink: 0;
+  }
+
+  .portrait-box {
+    width: 140px;
+    height: 170px;
+    border: 2px solid var(--border);
+    background: var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .portrait-box:hover { border-color: var(--red); }
+
+  .portrait-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .portrait-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+  }
+
+  .portrait-placeholder svg { opacity: 0.4; }
+
+  .portrait-placeholder span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .portrait-remove {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--red);
+    color: var(--red);
+    width: 22px; height: 22px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .portrait-box:hover .portrait-remove { display: flex; }
+
+  .identity-inner {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .identity-fields { flex: 1; }
+
+  /* Catchphrase */
+  .catchphrase-input {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 18px !important;
+    font-style: italic;
+    color: var(--accent) !important;
+    letter-spacing: 1px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1a1a1a;
+    border: 1px solid var(--red);
+    border-left: 4px solid var(--red);
+    color: var(--text);
+    padding: 12px 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 9999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .full-width { grid-column: 1; }
+    .attr-grid { grid-template-columns: 1fr; }
+    .col-2, .col-3, .col-4 { grid-template-columns: 1fr; }
+    .contact-item { grid-template-columns: 1fr 1fr; }
+    .feat-item { flex-direction: column; }
+    .feat-item .feat-name { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="logo">OUT<span>■</span>GUNNED</div>
+      <div class="tagline">Cinematic Action RPG — Character Sheet</div>
+    </div>
+    <div class="header-badge">TWO LITTLE MICE</div>
+  </div>
+</div>
+
+<!-- Save bar -->
+<div class="save-bar">
+  <span class="save-status" id="saveStatus">● UNSAVED</span>
+  <button class="btn btn-primary" onclick="saveToCloud()">☁️ SAVE & GET LINK</button>
+  <button class="btn btn-ghost" onclick="saveData()">SAVE LOCAL</button>
+  <button class="btn btn-ghost" onclick="clearData()">NEW CHARACTER</button>
+  <button class="btn btn-ghost" onclick="exportData()">EXPORT JSON</button>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- IDENTITY -->
+  <div class="panel full-width">
+    <div class="panel-header">
+      <div class="panel-title">IDENTITY</div>
+      <div class="panel-num">01</div>
+    </div>
+    <div class="panel-body">
+      <div class="identity-inner">
+        <div class="portrait-wrap">
+          <label style="margin-bottom:6px;display:block">Portrait</label>
+          <div class="portrait-box" id="portraitBox" onclick="document.getElementById('portraitInput').click()">
+            <div class="portrait-placeholder" id="portraitPlaceholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+              <span>Upload<br>Portrait</span>
+            </div>
+            <img id="portraitImg" style="display:none">
+            <button class="portrait-remove" id="portraitRemove" onclick="removePortrait(event)">✕</button>
+          </div>
+          <input type="file" id="portraitInput" accept="image/*" style="display:none" onchange="loadPortrait(event)">
+        </div>
+        <div class="identity-fields">
+        <div class="field" style="margin-bottom:16px">
+          <label>Hero Name</label>
+          <input type="text" class="hero-name-input" id="heroName" placeholder="YOUR NAME HERE" oninput="markUnsaved()">
+        </div>
+        <div class="col-4">
+        <div class="field">
+          <label>Role</label>
+          <select id="role" onchange="markUnsaved()">
+            <option value="">— Select —</option>
+            <option>The Commando</option>
+            <option>The Fighter</option>
+            <option>The Ace</option>
+            <option>The Agent</option>
+            <option>The Face</option>
+            <option>The Medic</option>
+            <option>The Tech</option>
+            <option>The Sniper</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Trope</label>
+          <input type="text" id="trope" placeholder="e.g. The Lone Wolf" oninput="markUnsaved()">
+        </div>
+        <div class="field">
+          <label>Age</label>
+          <select id="age" onchange="markUnsaved()">
+            <option value="">—</option>
+            <option>Young</option>
+            <option>Adult</option>
+            <option>Old</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Player</label>
+          <input type="text" id="player" placeholder="Player name" oninput="markUnsaved()">
+        </div>
+        </div><!-- end col-4 -->
+        </div><!-- end identity-fields -->
+      </div><!-- end identity-inner -->
+      <div style="margin-top:14px" class="field">
+        <label>Catchphrase</label>
+        <input type="text" class="catchphrase-input" id="catchphrase" placeholder='"Get to the chopper."' oninput="markUnsaved()">
+      </div>
+    </div>
+    <div class="diag-accent"></div>
+  </div>
+
+  <!-- ATTRIBUTES & SKILLS -->
+  <div class="panel full-width">
+    <div class="panel-header">
+      <div class="panel-title">ATTRIBUTES & SKILLS</div>
+      <div class="panel-num">02</div>
+    </div>
+    <div class="panel-body">
+      <div class="attr-grid" id="attrGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- GRIT & HERO DICE -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">GRIT</div>
+      <div class="panel-num">03</div>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">Grit Points (click to track)</div>
+      <div class="grit-track" id="gritTrack"></div>
+      <div class="grit-label" id="gritLabel">0 / 10</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">HERO DICE & FLASHBACKS</div>
+      <div class="panel-num">04</div>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">Hero Dice</div>
+      <div class="dice-track" id="heroDiceTrack"></div>
+      <div class="divider"></div>
+      <div class="section-label">Flashbacks Used</div>
+      <div class="dice-track" id="flashbackTrack"></div>
+    </div>
+  </div>
+
+  <!-- STATUS EFFECTS -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">STATUS EFFECTS</div>
+      <div class="panel-num">05</div>
+    </div>
+    <div class="panel-body">
+      <div class="status-grid" id="statusGrid"></div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE MOVES -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">SIGNATURE MOVES</div>
+      <div class="panel-num">06</div>
+    </div>
+    <div class="panel-body">
+      <div class="gear-list" id="movesList"></div>
+      <button class="add-btn" onclick="addMove()">+ ADD SIGNATURE MOVE</button>
+    </div>
+  </div>
+
+  <!-- FEATS -->
+  <div class="panel full-width">
+    <div class="panel-header">
+      <div class="panel-title">FEATS</div>
+      <div class="panel-num">07</div>
+    </div>
+    <div class="panel-body">
+      <div class="feat-list" id="featList"></div>
+      <button class="add-btn" onclick="addFeat()">+ ADD FEAT</button>
+    </div>
+  </div>
+
+  <!-- WEAPONS & GEAR -->
+  <div class="panel full-width">
+    <div class="panel-header">
+      <div class="panel-title">WEAPONS & GEAR</div>
+      <div class="panel-num">08</div>
+    </div>
+    <div class="panel-body">
+      <div class="gear-list" id="gearList"></div>
+      <button class="add-btn" onclick="addGear()">+ ADD WEAPON OR ITEM</button>
+    </div>
+  </div>
+
+  <!-- ALLIES / RIVALS / CONTACTS -->
+  <div class="panel full-width">
+    <div class="panel-header">
+      <div class="panel-title">ALLIES · RIVALS · CONTACTS</div>
+      <div class="panel-num">09</div>
+    </div>
+    <div class="panel-body">
+      <div class="contact-list" id="contactList"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+        <button class="add-btn" style="flex:1;min-width:120px" onclick="addContact('Ally')">+ ALLY</button>
+        <button class="add-btn" style="flex:1;min-width:120px" onclick="addContact('Rival')">+ RIVAL</button>
+        <button class="add-btn" style="flex:1;min-width:120px" onclick="addContact('Contact')">+ CONTACT</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Character saved!</div>
+
+<script>
+
+
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://mwmcbuwffswwfmjbrohx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bWNidXdmZnN3d2ZtamJyb2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTczMzgsImV4cCI6MjA5MzI3MzMzOH0.kPHF5GrRo0P0XrAsgN-DezrqY3l9dQhNjMIvVX3sQQU';
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+};
+
+async function saveToCloud() {
+  gatherState();
+  const { portrait, ...dataWithoutPortrait } = state;
+  const payload = {
+    name: state.heroName || 'Unnamed',
+    data: JSON.stringify(dataWithoutPortrait),
+    portrait: state.portrait || '',
+  };
+
+  // Check if already saved (has cloud id)
+  if(state.cloudId) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/characters?id=eq.${state.cloudId}`, {
+      method: 'PATCH',
+      headers: { ...HEADERS, 'Prefer': 'return=representation' },
+      body: JSON.stringify(payload),
+    });
+    if(res.ok) {
+      showToast('Saved to cloud! ☁️');
+      updateSaveStatus();
+    } else {
+      showToast('Save failed — try again');
+    }
+  } else {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/characters`, {
+      method: 'POST',
+      headers: { ...HEADERS, 'Prefer': 'return=representation' },
+      body: JSON.stringify(payload),
+    });
+    if(res.ok) {
+      const data = await res.json();
+      state.cloudId = data[0].id;
+      localStorage.setItem('outgunned_char', JSON.stringify(state));
+      const shareUrl = window.location.origin + window.location.pathname + '?id=' + state.cloudId;
+      showToast('Saved! Share link copied ✅');
+      navigator.clipboard.writeText(shareUrl).catch(()=>{});
+      updateSaveStatus();
+    } else {
+      showToast('Save failed — try again');
+    }
+  }
+}
+
+async function loadFromCloud(id) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/characters?id=eq.${id}`, {
+    headers: HEADERS,
+  });
+  if(!res.ok) return;
+  const data = await res.json();
+  if(!data.length) return;
+  const row = data[0];
+  const parsed = JSON.parse(row.data);
+  parsed.portrait = row.portrait;
+  parsed.cloudId = row.id;
+  state = parsed;
+  applyState();
+  applyPortrait();
+  showToast('Character loaded! 🎬');
+}
+
+function updateSaveStatus() {
+  saved = true;
+  document.getElementById('saveStatus').textContent = '● SAVED TO CLOUD';
+  document.getElementById('saveStatus').className = 'save-status saved';
+}
+
+// Check URL for shared character
+const urlId = new URLSearchParams(window.location.search).get('id');
+
+// ===== PORTRAIT =====
+function loadPortrait(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.portrait = e.target.result;
+    applyPortrait();
+    markUnsaved();
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyPortrait() {
+  const img = document.getElementById('portraitImg');
+  const placeholder = document.getElementById('portraitPlaceholder');
+  if(state.portrait) {
+    img.src = state.portrait;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    placeholder.style.display = 'flex';
+  }
+}
+
+function removePortrait(e) {
+  e.stopPropagation();
+  state.portrait = null;
+  document.getElementById('portraitInput').value = '';
+  applyPortrait();
+  markUnsaved();
+}
+
+// ===== DATA =====
+const ATTRIBUTES = [
+  { key: 'brawn',  name: 'BRAWN',  skills: ['Endure','Fight','Force','Stunt','Survival'] },
+  { key: 'nerves', name: 'NERVES', skills: ['Cool','Drive','Shoot'] },
+  { key: 'smooth', name: 'SMOOTH', skills: ['Flirt','Leadership','Speech','Style'] },
+  { key: 'focus',  name: 'FOCUS',  skills: ['Detect','Fix','Heal','Know'] },
+  { key: 'crime',  name: 'CRIME',  skills: ['Awareness','Dexterity','Stealth','Streetwise'] },
+];
+
+const STATUSES = ['Bleeding','Pinned Down','Panicked','Stunned','Burning','Poisoned','Blinded','Disarmed'];
+
+let state = {
+  heroName:'', role:'', trope:'', age:'', player:'', catchphrase:'', portrait:null,
+  attrs: { brawn:0, nerves:0, smooth:0, focus:0, crime:0 },
+  skills: {},
+  grit: 0,
+  heroDice: 0,
+  flashbacks: 0,
+  statuses: [],
+  moves: [],
+  feats: [],
+  gear: [],
+  contacts: [],
+};
+
+let saved = true;
+
+// ===== INIT =====
+function init() {
+  buildAttrGrid();
+  buildGritTrack();
+  buildHeroDiceTrack();
+  buildFlashbackTrack();
+  buildStatusGrid();
+  loadData();
+}
+
+function buildAttrGrid() {
+  const grid = document.getElementById('attrGrid');
+  grid.innerHTML = '';
+  ATTRIBUTES.forEach(attr => {
+    const block = document.createElement('div');
+    block.className = 'attr-block';
+    block.innerHTML = `
+      <div class="attr-name">
+        ${attr.name}
+        <input type="number" class="attr-score" id="attr_${attr.key}" min="0" max="6" value="0" oninput="markUnsaved()">
+      </div>
+      <div class="skills-list">
+        ${attr.skills.map(s => `
+          <div class="skill-row">
+            <input type="number" class="skill-score" id="skill_${s.replace(/\s/g,'_')}" min="0" max="6" value="0" oninput="markUnsaved()">
+            <span class="skill-name">${s}</span>
+          </div>
+        `).join('')}
+      </div>`;
+    grid.appendChild(block);
+  });
+}
+
+function buildGritTrack() {
+  const track = document.getElementById('gritTrack');
+  track.innerHTML = '';
+  for(let i=1; i<=10; i++) {
+    const box = document.createElement('div');
+    box.className = 'grit-box';
+    box.dataset.i = i;
+    box.onclick = () => toggleGrit(i);
+    track.appendChild(box);
+  }
+}
+
+function buildHeroDiceTrack() {
+  const track = document.getElementById('heroDiceTrack');
+  track.innerHTML = '';
+  for(let i=1; i<=6; i++) {
+    const die = document.createElement('div');
+    die.className = 'die';
+    die.dataset.i = i;
+    die.textContent = i;
+    die.onclick = () => toggleDie('heroDice', i);
+    track.appendChild(die);
+  }
+}
+
+function buildFlashbackTrack() {
+  const track = document.getElementById('flashbackTrack');
+  track.innerHTML = '';
+  for(let i=1; i<=3; i++) {
+    const die = document.createElement('div');
+    die.className = 'die';
+    die.dataset.i = i;
+    die.textContent = i;
+    die.onclick = () => toggleDie('flashbacks', i);
+    track.appendChild(die);
+  }
+}
+
+function buildStatusGrid() {
+  const grid = document.getElementById('statusGrid');
+  grid.innerHTML = '';
+  STATUSES.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'status-chip';
+    chip.textContent = s;
+    chip.dataset.status = s;
+    chip.onclick = () => toggleStatus(s, chip);
+    grid.appendChild(chip);
+  });
+}
+
+// ===== GRIT =====
+function toggleGrit(i) {
+  if(state.grit >= i) { state.grit = i-1; }
+  else { state.grit = i; }
+  renderGrit();
+  markUnsaved();
+}
+function renderGrit() {
+  document.querySelectorAll('.grit-box').forEach(b => {
+    b.classList.toggle('filled', parseInt(b.dataset.i) <= state.grit);
+  });
+  document.getElementById('gritLabel').textContent = `${state.grit} / 10`;
+}
+
+// ===== DICE =====
+function toggleDie(type, i) {
+  if(state[type] >= i) state[type] = i-1;
+  else state[type] = i;
+  renderDice();
+  markUnsaved();
+}
+function renderDice() {
+  document.querySelectorAll('#heroDiceTrack .die').forEach(d => {
+    const i = parseInt(d.dataset.i);
+    d.classList.toggle('active', i <= state.heroDice);
+    d.classList.toggle('used', i > state.heroDice);
+  });
+  document.querySelectorAll('#flashbackTrack .die').forEach(d => {
+    const i = parseInt(d.dataset.i);
+    d.classList.toggle('active', i <= state.flashbacks);
+  });
+}
+
+// ===== STATUS =====
+function toggleStatus(s, chip) {
+  if(state.statuses.includes(s)) {
+    state.statuses = state.statuses.filter(x=>x!==s);
+    chip.classList.remove('active');
+  } else {
+    state.statuses.push(s);
+    chip.classList.add('active');
+  }
+  markUnsaved();
+}
+
+// ===== GEAR =====
+function addGear(val='') {
+  const list = document.getElementById('gearList');
+  const id = Date.now();
+  const row = document.createElement('div');
+  row.className = 'gear-item';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <input type="text" placeholder="e.g. Custom Shotgun — +1 Range" value="${val}" oninput="markUnsaved()">
+    <button class="gear-delete" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
+  list.appendChild(row);
+}
+
+function addMove(val='') {
+  const list = document.getElementById('movesList');
+  const row = document.createElement('div');
+  row.className = 'gear-item';
+  row.innerHTML = `
+    <input type="text" placeholder="e.g. Rolling Thunder — dive and shoot" value="${val}" oninput="markUnsaved()">
+    <button class="gear-delete" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
+  list.appendChild(row);
+}
+
+// ===== FEATS =====
+function addFeat(name='', desc='') {
+  const list = document.getElementById('featList');
+  const row = document.createElement('div');
+  row.className = 'feat-item';
+  row.innerHTML = `
+    <input type="text" class="feat-name" placeholder="Feat name" value="${name}" oninput="markUnsaved()">
+    <input type="text" class="feat-desc" placeholder="Description / effect" value="${desc}" oninput="markUnsaved()">
+    <button class="gear-delete" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
+  list.appendChild(row);
+}
+
+// ===== CONTACTS =====
+function addContact(type='Ally', name='', desc='') {
+  const list = document.getElementById('contactList');
+  const row = document.createElement('div');
+  row.className = 'contact-item';
+  const badgeClass = type==='Ally'?'badge-ally':type==='Rival'?'badge-rival':'badge-contact';
+  row.innerHTML = `
+    <div class="field">
+      <span class="contact-type-badge ${badgeClass}">${type}</span>
+      <input type="text" placeholder="Name" value="${name}" oninput="markUnsaved()">
+    </div>
+    <div></div>
+    <div class="field">
+      <label>Notes</label>
+      <input type="text" placeholder="Who are they?" value="${desc}" oninput="markUnsaved()">
+    </div>
+    <button class="gear-delete" style="align-self:end" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
+  list.appendChild(row);
+}
+
+// ===== SAVE / LOAD =====
+function gatherState() {
+  state.heroName = document.getElementById('heroName').value;
+  state.role = document.getElementById('role').value;
+  state.trope = document.getElementById('trope').value;
+  state.age = document.getElementById('age').value;
+  state.player = document.getElementById('player').value;
+  state.catchphrase = document.getElementById('catchphrase').value;
+
+  ATTRIBUTES.forEach(attr => {
+    state.attrs[attr.key] = parseInt(document.getElementById(`attr_${attr.key}`)?.value)||0;
+    attr.skills.forEach(s => {
+      const key = s.replace(/\s/g,'_');
+      state.skills[key] = parseInt(document.getElementById(`skill_${key}`)?.value)||0;
+    });
+  });
+
+  state.moves = [...document.querySelectorAll('#movesList input[type=text]')].map(i=>i.value);
+  state.feats = [...document.querySelectorAll('#featList .feat-item')].map(row=>({
+    name: row.querySelector('.feat-name').value,
+    desc: row.querySelector('.feat-desc').value,
+  }));
+  state.gear = [...document.querySelectorAll('#gearList input[type=text]')].map(i=>i.value);
+  state.contacts = [...document.querySelectorAll('#contactList .contact-item')].map(row=>{
+    const badge = row.querySelector('.contact-type-badge');
+    const inputs = row.querySelectorAll('input');
+    return { type: badge.textContent, name: inputs[0].value, desc: inputs[1].value };
+  });
+}
+
+function saveData() {
+  gatherState();
+  localStorage.setItem('outgunned_char', JSON.stringify(state));
+  saved = true;
+  document.getElementById('saveStatus').textContent = '● SAVED';
+  document.getElementById('saveStatus').className = 'save-status saved';
+  showToast('Character saved!');
+}
+
+function loadData() {
+  const raw = localStorage.getItem('outgunned_char');
+  if(!raw) return;
+  try {
+    state = JSON.parse(raw);
+    applyState();
+  } catch(e) { console.error(e); }
+}
+
+function applyState() {
+  document.getElementById('heroName').value = state.heroName||'';
+  document.getElementById('role').value = state.role||'';
+  document.getElementById('trope').value = state.trope||'';
+  document.getElementById('age').value = state.age||'';
+  document.getElementById('player').value = state.player||'';
+  document.getElementById('catchphrase').value = state.catchphrase||'';
+  applyPortrait();
+
+  ATTRIBUTES.forEach(attr => {
+    const el = document.getElementById(`attr_${attr.key}`);
+    if(el) el.value = state.attrs?.[attr.key]||0;
+    attr.skills.forEach(s => {
+      const key = s.replace(/\s/g,'_');
+      const sel = document.getElementById(`skill_${key}`);
+      if(sel) sel.value = state.skills?.[key]||0;
+    });
+  });
+
+  renderGrit();
+  renderDice();
+
+  // statuses
+  document.querySelectorAll('.status-chip').forEach(chip => {
+    const active = (state.statuses||[]).includes(chip.dataset.status);
+    chip.classList.toggle('active', active);
+  });
+
+  // moves
+  document.getElementById('movesList').innerHTML = '';
+  (state.moves||[]).forEach(v => addMove(v));
+
+  // feats
+  document.getElementById('featList').innerHTML = '';
+  (state.feats||[]).forEach(f => addFeat(f.name, f.desc));
+
+  // gear
+  document.getElementById('gearList').innerHTML = '';
+  (state.gear||[]).forEach(v => addGear(v));
+
+  // contacts
+  document.getElementById('contactList').innerHTML = '';
+  (state.contacts||[]).forEach(c => addContact(c.type, c.name, c.desc));
+
+  saved = true;
+  document.getElementById('saveStatus').textContent = '● SAVED';
+  document.getElementById('saveStatus').className = 'save-status saved';
+}
+
+function clearData() {
+  if(!confirm('Start a new character? Current data will be cleared.')) return;
+  localStorage.removeItem('outgunned_char');
+  location.reload();
+}
+
+function exportData() {
+  gatherState();
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${state.heroName||'character'}.json`;
+  a.click();
+}
+
+function markUnsaved() {
+  saved = false;
+  document.getElementById('saveStatus').textContent = '● UNSAVED';
+  document.getElementById('saveStatus').className = 'save-status unsaved';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+window.addEventListener('beforeunload', e => {
+  if(!saved) { e.preventDefault(); e.returnValue=''; }
+});
+
+// Pre-fill JJ the Edge if no saved data
+function prefillJJ() {
+  const raw = localStorage.getItem('outgunned_char');
+  if(raw) { return; }
+
+  // Identity
+  document.getElementById('heroName').value = 'Eng Jia Jian (JJ the Edge)';
+  document.getElementById('role').value = 'The Fighter';
+  document.getElementById('trope').value = 'Bad to the Bone';
+  document.getElementById('age').value = 'Adult';
+  document.getElementById('player').value = '';
+  document.getElementById('catchphrase').value = '"เตรียมตัวลงนรกไว้เลย"';
+
+  // Portrait: user can upload manually
+
+  // Attributes & Skills — ตรงกับชีทของกลุ่มเลย
+  document.getElementById('attr_brawn').value = 3;
+  document.getElementById('skill_Endure').value = 3;
+  document.getElementById('skill_Fight').value = 3;
+  document.getElementById('skill_Force').value = 3;
+  document.getElementById('skill_Stunt').value = 3;
+  document.getElementById('skill_Survival').value = 2;
+
+  document.getElementById('attr_nerves').value = 3;
+  document.getElementById('skill_Cool').value = 3;
+  document.getElementById('skill_Drive').value = 3;
+  document.getElementById('skill_Shoot').value = 3;
+
+  document.getElementById('attr_smooth').value = 2;
+  document.getElementById('skill_Flirt').value = 3;
+  document.getElementById('skill_Leadership').value = 3;
+  document.getElementById('skill_Speech').value = 2;
+  document.getElementById('skill_Style').value = 3;
+
+  document.getElementById('attr_focus').value = 2;
+  document.getElementById('skill_Detect').value = 2;
+  document.getElementById('skill_Fix').value = 2;
+  document.getElementById('skill_Heal').value = 3;
+  document.getElementById('skill_Know').value = 2;
+
+  document.getElementById('attr_crime').value = 2;
+  document.getElementById('skill_Awareness').value = 2;
+  document.getElementById('skill_Dexterity').value = 3;
+  document.getElementById('skill_Stealth').value = 2;
+  document.getElementById('skill_Streetwise').value = 3;
+
+  // Grit — 3 filled (◉◉◉ on Brawn row)
+  state.grit = 6;
+  renderGrit();
+
+  // Feats
+  addFeat('Martial Arts', 'Gain a Free Re-roll for all Action and Reaction Rolls made when fighting in melee.');
+  addFeat('Combo [⚡]', 'After hitting an Enemy, spend 1 Adrenaline to deal 1 additional Grit. Can chain for more.');
+  addFeat('Parkour', 'Gain a Free Re-roll when jumping, performing feats of acrobatics, or breaking a fall.');
+
+  // Gear
+  addGear('Revolver');
+  addGear('Knife');
+
+  markUnsaved();
+}
+
+init();
+if(urlId) {
+  loadFromCloud(urlId);
+} else {
+  prefillJJ();
+}
+</script>
+</body>
+</html>
