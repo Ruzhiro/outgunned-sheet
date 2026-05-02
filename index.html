@@ -1360,7 +1360,7 @@ function prefillJJ() {
 init();
 if(urlId) {
   loadFromCloud(urlId);
-} else {
+} else if(!localStorage.getItem('outgunned_char')) {
   prefillJJ();
 }
 </script>
