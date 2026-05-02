@@ -870,6 +870,8 @@ async function saveToCloud() {
       body: JSON.stringify(payload),
     });
     if(res.ok) {
+      gatherState();
+      localStorage.setItem('outgunned_char', JSON.stringify(state));
       showToast('Saved to cloud! ☁️');
       updateSaveStatus();
     } else {
@@ -884,6 +886,7 @@ async function saveToCloud() {
     if(res.ok) {
       const data = await res.json();
       state.cloudId = data[0].id;
+      gatherState();
       localStorage.setItem('outgunned_char', JSON.stringify(state));
       const shareUrl = window.location.origin + window.location.pathname + '?id=' + state.cloudId;
       showToast('Saved! Share link copied ✅');
