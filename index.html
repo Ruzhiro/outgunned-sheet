@@ -864,7 +864,7 @@ async function saveToCloud() {
 
   // Check if already saved (has cloud id)
   if(state.cloudId) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/characters?id=eq.${state.cloudId}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/Characters?id=eq.${state.cloudId}`, {
       method: 'PATCH',
       headers: { ...HEADERS, 'Prefer': 'return=representation' },
       body: JSON.stringify(payload),
@@ -876,7 +876,7 @@ async function saveToCloud() {
       showToast('Save failed — try again');
     }
   } else {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/characters`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/Characters`, {
       method: 'POST',
       headers: { ...HEADERS, 'Prefer': 'return=representation' },
       body: JSON.stringify(payload),
@@ -896,7 +896,7 @@ async function saveToCloud() {
 }
 
 async function loadFromCloud(id) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/characters?id=eq.${id}`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/Characters?id=eq.${id}`, {
     headers: HEADERS,
   });
   if(!res.ok) return;
