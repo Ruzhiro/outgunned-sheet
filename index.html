@@ -4,1368 +4,638 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OUTGUNNED — Character Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --red: #e8192c;
-    --dark-red: #9e0d1c;
-    --black: #0a0a0a;
-    --dark: #111111;
-    --panel: #181818;
-    --border: #2a2a2a;
-    --text: #e8e0d4;
-    --muted: #6b6560;
-    --accent: #f5c842;
-    --white: #ffffff;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--black);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Noise texture overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.4;
-  }
-
-  /* Header */
-  .header {
-    background: var(--red);
-    padding: 0;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .header::before {
-    content: 'OUTGUNNED';
-    position: absolute;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 220px;
-    color: rgba(0,0,0,0.12);
-    right: -20px;
-    top: -40px;
-    line-height: 1;
-    pointer-events: none;
-    letter-spacing: -5px;
-  }
-
-  .header-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 36px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px;
-    letter-spacing: 4px;
-    color: white;
-    line-height: 1;
-  }
-
-  .logo span {
-    color: var(--accent);
-  }
-
-  .tagline {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.6);
-    margin-top: 4px;
-  }
-
-  .header-badge {
-    background: var(--black);
-    padding: 10px 20px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid rgba(245,200,66,0.3);
-  }
-
-  /* Save bar */
-  .save-bar {
-    background: var(--dark);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 36px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .save-status {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .save-status.saved { color: #4caf50; }
-  .save-status.unsaved { color: var(--accent); }
-
-  .btn {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 8px 20px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-primary {
-    background: var(--red);
-    color: white;
-  }
-  .btn-primary:hover { background: var(--dark-red); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
-
-  /* Main layout */
-  .main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 32px 24px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-  }
-
-  .full-width { grid-column: 1 / -1; }
-
-  /* Panel */
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--red);
-  }
-
-  .panel-header {
-    padding: 14px 20px 10px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .panel-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 2px;
-    color: var(--red);
-  }
-
-  .panel-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: var(--muted);
-    margin-left: auto;
-  }
-
-  .panel-body { padding: 16px 20px; }
-
-  /* Fields */
-  .field-group {
-    display: grid;
-    gap: 12px;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  input[type="text"], input[type="number"], textarea, select {
-    background: var(--black);
-    border: 1px solid var(--border);
-    border-bottom: 2px solid #333;
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    font-size: 15px;
-    padding: 8px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-    width: 100%;
-  }
-
-  input:focus, textarea:focus, select:focus {
-    border-color: var(--red);
-    border-bottom-color: var(--red);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-    line-height: 1.5;
-  }
-
-  select option { background: var(--dark); }
-
-  .col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .col-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .col-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-
-  /* Identity panel — special big name */
-  .hero-name-input {
-    font-family: 'Bebas Neue', sans-serif !important;
-    font-size: 32px !important;
-    padding: 6px 12px !important;
-    color: var(--white) !important;
-    letter-spacing: 2px;
-  }
-
-  /* Attributes & Skills */
-  .attr-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .attr-block {
-    background: var(--black);
-    border: 1px solid var(--border);
-    padding: 12px;
-  }
-
-  .attr-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .attr-score {
-    width: 36px !important;
-    text-align: center;
-    font-family: 'Bebas Neue', sans-serif !important;
-    font-size: 20px !important;
-    padding: 2px 4px !important;
-    color: var(--accent) !important;
-  }
-
-  .skills-list {
-    margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .skill-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .skill-score {
-    width: 32px !important;
-    text-align: center;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    font-size: 14px !important;
-    padding: 3px !important;
-    flex-shrink: 0;
-  }
-
-  .skill-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    letter-spacing: 1px;
-    color: var(--text);
-    flex: 1;
-  }
-
-  /* Grit tracker */
-  .grit-track {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  .grit-box {
-    width: 32px;
-    height: 32px;
-    border: 2px solid var(--red);
-    cursor: pointer;
-    transition: all 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-  }
-
-  .grit-box.filled {
-    background: var(--red);
-  }
-
-  .grit-box:hover { border-color: white; }
-
-  .grit-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 1px;
-    color: var(--muted);
-    margin-top: 8px;
-  }
-
-  /* Dice trackers */
-  .dice-track {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  .die {
-    width: 36px;
-    height: 36px;
-    border: 2px solid #444;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    color: var(--muted);
-    position: relative;
-  }
-
-  .die::before {
-    content: '⬡';
-    font-size: 28px;
-    position: absolute;
-    opacity: 0.1;
-  }
-
-  .die.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(245, 200, 66, 0.08);
-  }
-
-  .die.used {
-    border-color: #333;
-    color: #333;
-    background: transparent;
-    text-decoration: line-through;
-  }
-
-  /* Status effects */
-  .status-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .status-chip {
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.15s;
-    color: var(--muted);
-    user-select: none;
-  }
-
-  .status-chip.active {
-    background: var(--red);
-    border-color: var(--red);
-    color: white;
-  }
-
-  /* Gear list */
-  .gear-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .gear-item {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .gear-item input { flex: 1; }
-
-  .gear-delete {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    padding: 8px 10px;
-    font-size: 14px;
-    transition: all 0.1s;
-  }
-  .gear-delete:hover { border-color: var(--red); color: var(--red); }
-
-  .add-btn {
-    margin-top: 8px;
-    background: transparent;
-    border: 1px dashed var(--border);
-    color: var(--muted);
-    padding: 8px;
-    width: 100%;
-    cursor: pointer;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: all 0.15s;
-  }
-  .add-btn:hover { border-color: var(--red); color: var(--red); }
-
-  /* Feats */
-  .feat-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .feat-item {
-    display: flex;
-    gap: 8px;
-  }
-
-  .feat-item .feat-name { width: 160px; flex-shrink: 0; }
-  .feat-item .feat-desc { flex: 1; }
-
-  /* Contacts */
-  .contact-list { display: flex; flex-direction: column; gap: 10px; }
-
-  .contact-item {
-    display: grid;
-    grid-template-columns: 100px 80px 1fr 34px;
-    gap: 6px;
-    align-items: start;
-  }
-
-  .contact-type-badge {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    margin-bottom: 4px;
-    display: inline-block;
-  }
-
-  .badge-ally { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
-  .badge-rival { background: rgba(232, 25, 44, 0.2); color: var(--red); }
-  .badge-contact { background: rgba(245, 200, 66, 0.15); color: var(--accent); }
-
-  /* Diagonal accent */
-  .diag-accent {
-    position: absolute;
-    bottom: 0; right: 0;
-    width: 60px; height: 60px;
-    background: linear-gradient(135deg, transparent 50%, rgba(232,25,44,0.08) 50%);
-    pointer-events: none;
-  }
-
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
-
-  .section-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-
-
-  /* Portrait */
-  .portrait-wrap {
-    width: 140px;
-    flex-shrink: 0;
-  }
-
-  .portrait-box {
-    width: 140px;
-    height: 170px;
-    border: 2px solid var(--border);
-    background: var(--black);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-
-  .portrait-box:hover { border-color: var(--red); }
-
-  .portrait-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .portrait-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    color: var(--muted);
-  }
-
-  .portrait-placeholder svg { opacity: 0.4; }
-
-  .portrait-placeholder span {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: center;
-  }
-
-  .portrait-remove {
-    position: absolute;
-    top: 4px; right: 4px;
-    background: rgba(0,0,0,0.7);
-    border: 1px solid var(--red);
-    color: var(--red);
-    width: 22px; height: 22px;
-    font-size: 12px;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  .portrait-box:hover .portrait-remove { display: flex; }
-
-  .identity-inner {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-  }
-
-  .identity-fields { flex: 1; }
-
-  /* Catchphrase */
-  .catchphrase-input {
-    font-family: 'Barlow Condensed', sans-serif !important;
-    font-size: 18px !important;
-    font-style: italic;
-    color: var(--accent) !important;
-    letter-spacing: 1px;
-  }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: #1a1a1a;
-    border: 1px solid var(--red);
-    border-left: 4px solid var(--red);
-    color: var(--text);
-    padding: 12px 20px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 9999;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-
-  @media (max-width: 768px) {
-    .main { grid-template-columns: 1fr; }
-    .full-width { grid-column: 1; }
-    .attr-grid { grid-template-columns: 1fr; }
-    .col-2, .col-3, .col-4 { grid-template-columns: 1fr; }
-    .contact-item { grid-template-columns: 1fr 1fr; }
-    .feat-item { flex-direction: column; }
-    .feat-item .feat-name { width: 100%; }
-  }
+:root {
+  --red: #c0171f;
+  --dark-red: #8a0f15;
+  --ink: #1a1a1a;
+  --paper: #faf7f2;
+  --rule: #c8bfb0;
+  --muted: #9a9080;
+  --accent: #f5c842;
+  --bg-left: #e8e0d4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #2a2520; font-family: 'Barlow Condensed', sans-serif; min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { background: var(--ink); padding: 8px 20px; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid var(--red); }
+.topbar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: white; letter-spacing: 3px; }
+.topbar-logo span { color: var(--accent); }
+.save-st { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #666; margin-left: auto; }
+.save-st.saved { color: #4caf50; } .save-st.unsaved { color: var(--accent); }
+.btn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; border: none; cursor: pointer; }
+.btn-red { background: var(--red); color: white; } .btn-red:hover { background: var(--dark-red); }
+.btn-ghost { background: transparent; color: #888; border: 1px solid #444; } .btn-ghost:hover { color: white; }
+
+/* SHEET: 3 columns — left(portrait) | center(identity+attrs+grit+feats) | right(spotlight+mission+conditions+gear) */
+.sheet {
+  max-width: 1260px; margin: 16px auto;
+  background: var(--paper);
+  box-shadow: 0 8px 48px rgba(0,0,0,0.7);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
+}
+
+/* shared */
+.lbl { font-size: 7px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--red); font-weight: 700; margin-bottom: 0px; }
+.fi { background: transparent; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; padding: 1px 0; outline: none; width: 100%; }
+.fi:focus { border-bottom-color: var(--red); }
+.fi::placeholder { color: #ccc; }
+.fl { display: flex; flex-direction: column; gap: 0px; margin-bottom: 3px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sec-title { font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 1px; color: var(--red); border-bottom: 1px solid var(--rule); padding-bottom: 1px; margin-bottom: 5px; }
+.add-btn { background: transparent; border: 1px dashed var(--rule); color: var(--muted); padding: 3px 8px; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; width: 100%; margin-top: 4px; transition: all 0.1s; }
+.add-btn:hover { border-color: var(--red); color: var(--red); }
+.del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 10px; padding: 0 2px; flex-shrink: 0; }
+.del:hover { color: var(--red); }
+
+/* ── COL 1: Portrait ── */
+.col-portrait {
+  background: var(--bg-left);
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.portrait-box {
+  width: 100%;
+  aspect-ratio: 4/3; width: 100%;
+}
+
+.portrait-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.portrait-ph { display: flex; flex-direction: column; align-items: center; gap: 6px; color: #8a7d6e; position: relative; z-index: 1; }
+.portrait-ph span { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
+.portrait-del { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); border: 1px solid var(--red); color: var(--red); width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 3; }
+.portrait-box:hover .portrait-del { display: flex; }
+.portrait-wm { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.8); letter-spacing: 2px; pointer-events: none; z-index: 2; }
+.portrait-wm span { color: var(--accent); }
+
+/* ── COL 2 TOP: Identity ── */
+.col-identity {
+  padding: 6px 10px;
+}
+
+/* ── COL 3 TOP: Spotlight + Mission + Experiences ── */
+.col-spotlight {
+  grid-column: 2; grid-row: 1;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.spotlight-left {
+  border-right: 1px solid var(--rule);
+  padding-right: 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.spotlight-right { padding-left: 12px; }
+.spotlight-circle {
+  width: 90px; height: 90px; border: 3px solid var(--red); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+}
+.spotlight-inner { width: 64px; height: 64px; border: 2px solid var(--rule); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; transition: all 0.2s; }
+.spotlight-inner.on { background: var(--red); }
+.spotlight-label { font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--red); text-align: center; }
+.spotlight-hint { font-size: 8px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; text-align: center; }
+
+/* Adrenaline under spotlight */
+.adr-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--red); letter-spacing: 2px; line-height: 1; }
+.adr-track { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+.adr-pip { width: 26px; height: 26px; border: 2px solid var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; font-family: 'Bebas Neue', sans-serif; font-size: 13px; color: var(--ink); }
+.adr-pip.on { background: var(--ink); color: white; }
+.adr-hint { font-size: 8px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-top: 3px; }
+
+.exp-inp { border: none; border-bottom: 1px solid var(--rule); background: transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--ink); outline: none; padding: 2px 0; width: 100%; display: block; margin-bottom: 3px; }
+
+/* ── COL 2 BOTTOM: Attrs + Grit + Feats ── */
+.col-attrs {
+  grid-column: 1; grid-row: 2;
+  border-right: 1px solid var(--rule);
+  padding: 6px 10px;
+}
+
+/* Attrs */
+.attr-block { margin-bottom: 2px; }
+.attr-hd { background: var(--red); color: white; font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px; padding: 2px 8px; display: flex; align-items: center; gap: 4px; }
+.attr-pips { display: flex; gap: 3px; }
+.ap { width: 10px; height: 10px; border: 1.5px solid rgba(255,255,255,0.8); border-radius: 1px; cursor: pointer; flex-shrink: 0; }
+.ap.on { background: white; }
+.skill-rows { padding: 1px 8px 3px; }
+.sk-row { display: flex; align-items: center; gap: 3px; padding: 1px 0; }
+.sk-name { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700; color: var(--ink); flex: 1; }
+.sk-pips { display: flex; gap: 2px; margin-left: 2px; }
+.sp { width: 8px; height: 8px; border: 1.5px solid var(--ink); border-radius: 1px; cursor: pointer; flex-shrink: 0; }
+.sp.on { background: var(--ink); }
+
+/* Grit */
+.grit-section { margin-top: 8px; }
+.grit-title { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 2px; color: var(--ink); margin-bottom: 4px; }
+.grit-track { display: flex; gap: 4px; flex-wrap: wrap; }
+.gp { width: 24px; height: 24px; border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: all 0.1s; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.gp.on { background: var(--ink); color: white; }
+.gp.bad { border-color: var(--red); }
+.gp.bad.on { background: var(--red); color: white; }
+.gp.hot { border-color: var(--accent); }
+.gp.hot.on { background: var(--accent); color: var(--ink); }
+.grit-lbs { display: flex; justify-content: space-between; font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: var(--red); font-weight: 700; margin-top: 2px; }
+.grit-hint { font-size: 8px; letter-spacing: 1px; color: var(--muted); margin-top: 1px; }
+
+/* Feats */
+.feats-section { margin-top: 8px; }
+.feat-item { display: flex; gap: 4px; align-items: flex-start; border-bottom: 1px solid var(--rule); padding: 3px 0; }
+.feat-n { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; background: transparent; border: none; outline: none; color: var(--ink); width: 100px; flex-shrink: 0; }
+.feat-d { font-family: 'Barlow', sans-serif; font-size: 10px; background: transparent; border: none; outline: none; color: #666; flex: 1; }
+
+/* ── COL 3 BOTTOM: Conditions + Death + Gear + Contacts + CSR ── */
+.col-right {
+  display: none;
+}
+
+/* YOU LOOK */
+.you-look-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; background: var(--red); color: white; letter-spacing: 2px; padding: 2px 10px; text-align: center; margin-bottom: 5px; }
+.cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin-bottom: 3px; }
+.cond-item { display: flex; align-items: center; gap: 4px; }
+.cc { width: 12px; height: 12px; border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: all 0.1s; }
+.cc.on { background: var(--red); border-color: var(--red); }
+.cn { font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700; color: var(--red); }
+.ca { font-size: 8px; color: var(--muted); }
+.cond-note { font-size: 8px; color: var(--muted); font-style: italic; margin-bottom: 6px; }
+
+/* Death Roulette */
+.death-section { margin-bottom: 8px; }
+.death-track { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+.dr-pip { width: 26px; height: 26px; border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--ink); transition: all 0.15s; background: var(--paper); }
+.dr-pip.skull-pip { border-color: var(--red); color: var(--red); }
+.dr-pip.on { background: var(--red); border-color: var(--red); color: white; }
+
+/* Guns & Gear */
+.gear-section { margin-bottom: 6px; }
+.gear-hd { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3px; }
+.box-title { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px; color: white; background: var(--ink); padding: 2px 8px; display: inline-block; }
+.range-hd { display: flex; gap: 4px; font-size: 7px; letter-spacing: 0.5px; color: var(--muted); text-transform: uppercase; }
+.range-hd span { width: 22px; text-align: center; }
+.gear-item { display: flex; gap: 4px; align-items: center; border-bottom: 1px solid var(--rule); padding: 2px 0; }
+.gear-n { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; background: transparent; border: none; outline: none; color: var(--ink); flex: 1; }
+.rng { width: 22px; height: 16px; background: transparent; border: 1px solid var(--rule); outline: none; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; text-align: center; color: var(--ink); }
+
+/* Contacts */
+.contacts-section { margin-bottom: 8px; }
+.contact-item { display: flex; gap: 4px; align-items: center; border-bottom: 1px solid var(--rule); padding: 2px 0; }
+.cbadge { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 1px 4px; font-weight: 700; flex-shrink: 0; }
+.b-ally { background: rgba(76,175,80,0.15); color: #2a7a2a; }
+.b-rival { background: rgba(192,23,31,0.15); color: var(--red); }
+.b-contact { background: rgba(245,200,66,0.2); color: #7a6000; }
+.contact-inp { background: transparent; border: none; border-bottom: 1px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: var(--ink); outline: none; flex: 1; }
+.contact-inp:focus { border-bottom-color: var(--rule); }
+.contact-inp.notes { color: #666; font-family: 'Barlow', sans-serif; font-size: 10px; flex: 2; }
+
+/* Cash + Storage + Ride */
+.csr-row { display: grid; grid-template-columns: 60px 1fr; gap: 8px; margin-top: 4px; border-top: 1px solid var(--rule); padding-top: 6px; }
+.cash-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.cash-track { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+.cash-pip { width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 50%; cursor: pointer; }
+.cash-pip.on { background: var(--accent); border-color: var(--accent); }
+.storage-ride { display: flex; flex-direction: column; gap: 6px; }
+.storage-ta { width: 100%; height: 44px; background: transparent; border: 1px solid var(--rule); resize: none; font-family: 'Barlow', sans-serif; font-size: 10px; color: var(--ink); outline: none; padding: 3px; }
+.ride-name { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--rule); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--ink); outline: none; margin-bottom: 4px; }
+.spd-track { display: flex; gap: 3px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.spd-pip { width: 22px; height: 22px; border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 10px; color: var(--ink); transition: all 0.15s; background: var(--paper); flex-shrink: 0; }
+.spd-pip.neg { border-color: var(--red); color: var(--red); }
+.spd-pip.pos { border-color: #2a7a2a; color: #2a7a2a; }
+.spd-pip.center { width: 26px; height: 26px; font-size: 11px; font-weight: 700; }
+.spd-pip.on { color: white; }
+.spd-pip.neg.on { background: var(--red); }
+.spd-pip.pos.on { background: #2a7a2a; }
+.spd-pip.center.on { background: var(--ink); color: white; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--ink); border: 1px solid var(--red); border-left: 4px solid var(--red); color: white; padding: 10px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 9999; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* MODAL */
+.modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-box { background: var(--paper); border: 2px solid var(--red); max-width: 480px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 20px; position: relative; }
+.modal-ttl { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--red); letter-spacing: 3px; margin-bottom: 10px; }
+.modal-st { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--red); font-weight: 700; border-bottom: 1px solid var(--rule); padding-bottom: 2px; margin: 8px 0 5px; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.tag { background: #e8e0d4; border: 1px solid var(--rule); padding: 2px 7px; font-size: 11px; color: var(--ink); }
 </style>
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-  <div class="header-inner">
-    <div>
-      <div class="logo">OUT<span>■</span>GUNNED</div>
-      <div class="tagline">Cinematic Action RPG — Character Sheet</div>
-    </div>
-    <div class="header-badge">TWO LITTLE MICE</div>
-  </div>
+<div class="topbar">
+  <div class="topbar-logo">OUT<span>■</span>GUNNED</div>
+  <span style="color:#555;font-size:10px;letter-spacing:1px;">CHARACTER SHEET</span>
+  <span class="save-st" id="saveStatus">● UNSAVED</span>
+  <button class="btn btn-red" onclick="saveToCloud()">☁️ SAVE & SHARE</button>
+  <button class="btn btn-ghost" onclick="saveData()">LOCAL</button>
+  <button class="btn btn-ghost" onclick="clearData()">NEW</button>
+  <button class="btn btn-ghost" onclick="exportData()">EXPORT</button>
 </div>
 
-<!-- Save bar -->
-<div class="save-bar">
-  <span class="save-status" id="saveStatus">● UNSAVED</span>
-  <button class="btn btn-primary" onclick="saveToCloud()">☁️ SAVE & GET LINK</button>
-  <button class="btn btn-ghost" onclick="saveData()">SAVE LOCAL</button>
-  <button class="btn btn-ghost" onclick="clearData()">NEW CHARACTER</button>
-  <button class="btn btn-ghost" onclick="exportData()">EXPORT JSON</button>
-</div>
+<div class="sheet">
 
-<!-- Main -->
-<div class="main">
-
-  <!-- IDENTITY -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <div class="panel-title">IDENTITY</div>
-      <div class="panel-num">01</div>
-    </div>
-    <div class="panel-body">
-      <div class="identity-inner">
-        <div class="portrait-wrap">
-          <label style="margin-bottom:6px;display:block">Portrait</label>
-          <div class="portrait-box" id="portraitBox" onclick="document.getElementById('portraitInput').click()">
-            <div class="portrait-placeholder" id="portraitPlaceholder">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-              </svg>
-              <span>Upload<br>Portrait</span>
-            </div>
-            <img id="portraitImg" style="display:none">
-            <button class="portrait-remove" id="portraitRemove" onclick="removePortrait(event)">✕</button>
-          </div>
-          <input type="file" id="portraitInput" accept="image/*" style="display:none" onchange="loadPortrait(event)">
+  <!-- ── LEFT TOP: Portrait + Identity ── -->
+  <div style="grid-column:1;grid-row:1;display:grid;grid-template-columns:180px 1fr;border-right:1px solid var(--rule);border-bottom:2px solid var(--rule);">
+    <div class="col-portrait" style="border-right:1px solid var(--rule);border-bottom:none;">
+      <div class="portrait-box" id="portraitBox" onclick="document.getElementById('pi').click()">
+        <div class="portrait-ph" id="portraitPh">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span>UPLOAD<br>PORTRAIT</span>
         </div>
-        <div class="identity-fields">
-        <div class="field" style="margin-bottom:16px">
-          <label>Hero Name</label>
-          <input type="text" class="hero-name-input" id="heroName" placeholder="YOUR NAME HERE" oninput="markUnsaved()">
-        </div>
-        <div class="col-4">
-        <div class="field">
-          <label>Role</label>
-          <select id="role" onchange="markUnsaved()">
-            <option value="">— Select —</option>
-            <option>The Commando</option>
-            <option>The Fighter</option>
-            <option>The Ace</option>
-            <option>The Agent</option>
-            <option>The Face</option>
-            <option>The Medic</option>
-            <option>The Tech</option>
-            <option>The Sniper</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Trope</label>
-          <input type="text" id="trope" placeholder="e.g. The Lone Wolf" oninput="markUnsaved()">
-        </div>
-        <div class="field">
-          <label>Age</label>
-          <select id="age" onchange="markUnsaved()">
-            <option value="">—</option>
-            <option>Young</option>
-            <option>Adult</option>
-            <option>Old</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Player</label>
-          <input type="text" id="player" placeholder="Player name" oninput="markUnsaved()">
-        </div>
-        </div><!-- end col-4 -->
-        </div><!-- end identity-fields -->
-      </div><!-- end identity-inner -->
-      <div style="margin-top:14px" class="field">
-        <label>Catchphrase</label>
-        <input type="text" class="catchphrase-input" id="catchphrase" placeholder='"Get to the chopper."' oninput="markUnsaved()">
+        <img id="portraitImg" style="display:none">
+        <button class="portrait-del" onclick="removePortrait(event)">✕</button>
       </div>
+      <div class="portrait-wm">OUT<span>■</span>GUN</div>
+      <input type="file" id="pi" accept="image/*" style="display:none" onchange="loadPortrait(event)">
     </div>
-    <div class="diag-accent"></div>
-  </div>
-
-  <!-- ATTRIBUTES & SKILLS -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <div class="panel-title">ATTRIBUTES & SKILLS</div>
-      <div class="panel-num">02</div>
-    </div>
-    <div class="panel-body">
-      <div class="attr-grid" id="attrGrid">
-        <!-- Rendered by JS -->
+    <div class="col-identity" style="border-right:none;border-bottom:none;">
+    <div class="fl"><div class="lbl">Name</div><input class="fi" id="heroName" placeholder="Hero name" oninput="mu()"></div>
+    <div class="row2">
+      <div class="fl">
+        <div class="lbl" style="display:flex;align-items:center;gap:3px;">Role
+          <button onclick="showRoleModal()" style="background:none;border:1px solid #ccc;color:var(--red);cursor:pointer;padding:0 3px;font-size:7px;line-height:12px;letter-spacing:1px;">?</button>
+        </div>
+        <select class="fi" id="role" onchange="mu()">
+          <option value="">— Select —</option>
+          <option>The Commando</option><option>The Fighter</option><option>The Ace</option>
+          <option>The Agent</option><option>The Face</option><option>The Nobody</option>
+          <option>The Brain</option><option>The Sleuth</option><option>The Criminal</option><option>The Spy</option>
+        </select>
       </div>
+      <div class="fl"><div class="lbl">Trope</div><input class="fi" id="trope" placeholder="" oninput="mu()"></div>
+    </div>
+    <div class="row2">
+      <div class="fl"><div class="lbl">Job</div><input class="fi" id="job" placeholder="" oninput="mu()"></div>
+      <div class="fl"><div class="lbl">Age</div><select class="fi" id="age" onchange="mu()"><option value="">—</option><option>Young</option><option>Adult</option><option>Old</option></select></div>
+    </div>
+    <div class="fl"><div class="lbl">Flaw</div><input class="fi" id="flaw" placeholder="" oninput="mu()"></div>
+    <div class="fl"><div class="lbl">Catchphrase</div><input class="fi" id="catchphrase" placeholder="" oninput="mu()" style="font-style:italic;color:var(--red);"></div>
+    <div class="fl"><div class="lbl">Player</div><input class="fi" id="player" placeholder="" oninput="mu()"></div>
     </div>
   </div>
 
-  <!-- GRIT & HERO DICE -->
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">GRIT</div>
-      <div class="panel-num">03</div>
+  <!-- ── COL 3 TOP: Spotlight + Adrenaline | Mission + Experiences ── -->
+  <div class="col-spotlight">
+    <div class="spotlight-left">
+      <div class="spotlight-circle" onclick="toggleSpotlight()">
+        <div class="spotlight-inner" id="spotlightInner">🎬</div>
+      </div>
+      <div class="spotlight-label">SPOTLIGHT</div>
+      <div class="spotlight-hint">⚡ GAIN +1<br>6⚡ TAKE THE SPOTLIGHT</div>
+      <!-- Adrenaline under spotlight -->
+      <div style="width:100%;margin-top:8px;">
+        <div class="adr-title">ADRENALINE!</div>
+        <div class="adr-track" id="adrTrack"></div>
+        <div class="adr-hint">⚡ Gain +1 &nbsp;|&nbsp; 6⚡ Take Spotlight</div>
+      </div>
     </div>
-    <div class="panel-body">
-      <div class="section-label">Grit Points (click to track)</div>
+    <div class="spotlight-right">
+      <div class="fl"><div class="lbl">Mission</div><input class="fi" id="mission" placeholder="" oninput="mu()"></div>
+      <div class="sec-title" style="margin-top:4px;">EXPERIENCES</div>
+      <div id="expLines"></div>
+      <div style="font-size:8px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:4px;">Achievements · Scars · Bonds · Reputations</div>
+    </div>
+  </div>
+
+  <!-- ── COL 2 BOTTOM: Attrs + Grit + Feats ── -->
+  <div class="col-attrs">
+    <div id="attrSection"></div>
+  </div>
+
+  <!-- ── COL 3 ROW 2: Grit + Feats ── -->
+  <div class="col-grit-feats" style="grid-column:2;grid-row:2;padding:6px 10px;border-right:none;border-bottom:2px solid var(--rule);border-left:1px solid var(--rule);">
+    <div class="grit-section">
+      <div class="grit-title">GRIT</div>
       <div class="grit-track" id="gritTrack"></div>
-      <div class="grit-label" id="gritLabel">0 / 10</div>
+      <div class="grit-lbs"><span>BAD!</span><span>HOT!</span></div>
+      <div class="grit-hint">BAD: Suffer a Condition &nbsp;|&nbsp; HOT: Gain 2 Adrenaline</div>
     </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">HERO DICE & FLASHBACKS</div>
-      <div class="panel-num">04</div>
-    </div>
-    <div class="panel-body">
-      <div class="section-label">Hero Dice</div>
-      <div class="dice-track" id="heroDiceTrack"></div>
-      <div class="divider"></div>
-      <div class="section-label">Flashbacks Used</div>
-      <div class="dice-track" id="flashbackTrack"></div>
-    </div>
-  </div>
-
-  <!-- STATUS EFFECTS -->
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">STATUS EFFECTS</div>
-      <div class="panel-num">05</div>
-    </div>
-    <div class="panel-body">
-      <div class="status-grid" id="statusGrid"></div>
-    </div>
-  </div>
-
-  <!-- SIGNATURE MOVES -->
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">SIGNATURE MOVES</div>
-      <div class="panel-num">06</div>
-    </div>
-    <div class="panel-body">
-      <div class="gear-list" id="movesList"></div>
-      <button class="add-btn" onclick="addMove()">+ ADD SIGNATURE MOVE</button>
-    </div>
-  </div>
-
-  <!-- FEATS -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <div class="panel-title">FEATS</div>
-      <div class="panel-num">07</div>
-    </div>
-    <div class="panel-body">
-      <div class="feat-list" id="featList"></div>
+    <div class="feats-section">
+      <div class="sec-title">FEATS</div>
+      <div id="featsList"></div>
       <button class="add-btn" onclick="addFeat()">+ ADD FEAT</button>
     </div>
-  </div>
+    <!-- YOU LOOK moved here -->
+    <div style="margin-top:8px;">
+      <div class="you-look-title">YOU LOOK</div>
+      <div class="cond-grid" id="condGrid"></div>
+      <div class="cond-note">Your 4th condition is always BROKEN</div>
+    </div>
 
-  <!-- WEAPONS & GEAR -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <div class="panel-title">WEAPONS & GEAR</div>
-      <div class="panel-num">08</div>
+    <div class="death-section">
+      <div class="sec-title">DEATH ROULETTE</div>
+      <div class="death-track" id="deathTrack"></div>
     </div>
-    <div class="panel-body">
-      <div class="gear-list" id="gearList"></div>
-      <button class="add-btn" onclick="addGear()">+ ADD WEAPON OR ITEM</button>
-    </div>
-  </div>
 
-  <!-- ALLIES / RIVALS / CONTACTS -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <div class="panel-title">ALLIES · RIVALS · CONTACTS</div>
-      <div class="panel-num">09</div>
+    <div class="gear-section">
+      <div class="gear-hd">
+        <div class="box-title">GUNS & GEAR</div>
+        <div class="range-hd"><span>Mel</span><span>Cls</span><span>Med</span><span>Lng</span></div>
+      </div>
+      <div id="gearList"></div>
+      <button class="add-btn" onclick="addGear()">+ ADD WEAPON/ITEM</button>
     </div>
-    <div class="panel-body">
-      <div class="contact-list" id="contactList"></div>
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-        <button class="add-btn" style="flex:1;min-width:120px" onclick="addContact('Ally')">+ ALLY</button>
-        <button class="add-btn" style="flex:1;min-width:120px" onclick="addContact('Rival')">+ RIVAL</button>
-        <button class="add-btn" style="flex:1;min-width:120px" onclick="addContact('Contact')">+ CONTACT</button>
+
+    <div class="contacts-section">
+      <div style="display:flex;gap:5px;align-items:center;margin-bottom:4px;flex-wrap:wrap;">
+        <div class="box-title" style="font-size:11px;">ALLIES · RIVALS · CONTACTS</div>
+        <button class="add-btn" style="width:auto;padding:1px 6px;" onclick="addContact('Ally')">+Ally</button>
+        <button class="add-btn" style="width:auto;padding:1px 6px;" onclick="addContact('Rival')">+Rival</button>
+        <button class="add-btn" style="width:auto;padding:1px 6px;" onclick="addContact('Contact')">+Contact</button>
+      </div>
+      <div id="contactsList"></div>
+    </div>
+
+    <div class="csr-row">
+      <div class="cash-col">
+        <div style="font-size:20px;">🐷</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:white;background:var(--ink);padding:1px 6px;">CA$H</div>
+        <div class="cash-track" id="cashTrack"></div>
+      </div>
+      <div class="storage-ride">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:white;background:var(--ink);padding:1px 6px;display:inline-block;margin-bottom:3px;">STORAGE</div>
+          <textarea class="storage-ta" id="storage" placeholder="Items in storage..." oninput="mu()"></textarea>
+        </div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:white;background:var(--ink);padding:1px 6px;display:inline-block;margin-bottom:3px;">RIDE</div>
+          <input class="ride-name" id="rideName" placeholder="Vehicle name" oninput="mu()">
+          <div style="font-size:8px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:3px;">SPEED</div>
+          <div class="spd-track" id="speedTrack"></div>
+        </div>
       </div>
     </div>
   </div>
+
+  
 
 </div>
-
-<!-- Toast -->
-<div class="toast" id="toast">Character saved!</div>
+<div class="toast" id="toast"></div>
 
 <script>
+const SB_URL='https://mwmcbuwffswwfmjbrohx.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bWNidXdmZnN3d2ZtamJyb2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTczMzgsImV4cCI6MjA5MzI3MzMzOH0.kPHF5GrRo0P0XrAsgN-DezrqY3l9dQhNjMIvVX3sQQU';
+const H={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 
-
-// ===== SUPABASE CONFIG =====
-const SUPABASE_URL = 'https://mwmcbuwffswwfmjbrohx.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bWNidXdmZnN3d2ZtamJyb2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTczMzgsImV4cCI6MjA5MzI3MzMzOH0.kPHF5GrRo0P0XrAsgN-DezrqY3l9dQhNjMIvVX3sQQU';
-const HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': SUPABASE_KEY,
-  'Authorization': 'Bearer ' + SUPABASE_KEY,
+const ROLES={
+  'The Commando':{attr:'Brawn',skills:['Endure','Fight','Force','Cool','Shoot','Survival','Leadership','Fix','Awareness','Stealth'],feats:['Hard to Kill','Hunter','Intimidation','Marksman','Military Background',"That's All?"],gear:['Knife','Telephone or Radio','Weapon of your choice']},
+  'The Fighter':{attr:'Brawn',skills:['Endure','Fight','Force','Stunt','Cool','Flirt','Leadership','Style','Heal','Dexterity'],feats:['Combo','Counter','Flying Kick','Hard to Kill','Martial Arts','Punch Reload'],gear:['One 1$ item of your choice']},
+  'The Ace':{attr:'Nerves',skills:['Stunt','Cool','Drive','Shoot','Flirt','Style','Fix','Awareness','Dexterity','Streetwise'],feats:['Car Jump','Crazy Stunt','Full Throttle!','Mechanic','Proven Driver','Spinout'],gear:['Ride with Speed 1','Pistol or Shotgun']},
+  'The Agent':{attr:'Nerves',skills:['Endure','Fight','Force','Cool','Shoot','Survival','Leadership','Fix','Awareness','Stealth'],feats:['Get Down!','Gunslinger','Hard to Kill','Lie to Me','Pep Talk','Selfless'],gear:['Pistol','Handcuffs','Badge','Telephone or Radio']},
+  'The Face':{attr:'Smooth',skills:['Flirt','Leadership','Speech','Style','Detect','Heal','Know','Dexterity','Stealth','Streetwise'],feats:['Artist','Cash Flow','Heartbreaker','High Culture','Master of Disguise','Silver Tongue'],gear:['Elegant Clothes','Precious item of choice']},
+  'The Nobody':{attr:'Smooth',skills:['Fight','Shoot','Survival','Leadership','Speech','Detect','Fix','Heal','Know','Dexterity'],feats:['High Culture',"I'll Make a Phone Call",'Lie to Me','Mechanic','Physician','Silver Tongue'],gear:['1$ item or old Ride Speed 0']},
+  'The Brain':{attr:'Focus',skills:['Drive','Leadership','Speech','Style','Detect','Fix','Heal','Know','Dexterity','Stealth'],feats:['Hacker','High Culture','Intuition','Mastermind','Outsmart','Scientist'],gear:['Portable Computer','Notebook','Pencil']},
+  'The Sleuth':{attr:'Focus',skills:['Endure','Stunt','Cool','Drive','Shoot','Detect','Know','Awareness','Stealth','Streetwise'],feats:['Detective',"I'll Make a Phone Call",'Intimidation','Marksman','Reporter','Shadow'],gear:['1$ item','Pistol or Rifle or Shotgun']},
+  'The Criminal':{attr:'Crime',skills:['Force','Stunt','Drive','Shoot','Survival','Speech','Awareness','Dexterity','Stealth','Streetwise'],feats:['Always Prepared','Gunslinger',"I'll Make a Phone Call",'Lockpick','Pickpocket','Silver Tongue'],gear:['Pistol','Knife or Lockpicking Set or Handcuffs']},
+  'The Spy':{attr:'Crime',skills:['Endure','Fight','Stunt','Cool','Drive','Shoot','Flirt','Detect','Awareness','Stealth'],feats:['Gunslinger','Heartbreaker','Martial Arts','Master of Disguise','Parkour','Shadow'],gear:['Elegant Clothes','Pistol with Silencer','Item of Choice']},
 };
 
-async function saveToCloud() {
-  gatherState();
-  const { portrait, ...dataWithoutPortrait } = state;
-  const payload = {
-    name: state.heroName || 'Unnamed',
-    data: JSON.stringify(dataWithoutPortrait),
-    portrait: state.portrait || '',
-  };
-
-  // Check if already saved (has cloud id)
-  if(state.cloudId) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Characters?id=eq.${state.cloudId}`, {
-      method: 'PATCH',
-      headers: { ...HEADERS, 'Prefer': 'return=representation' },
-      body: JSON.stringify(payload),
-    });
-    if(res.ok) {
-      gatherState();
-      localStorage.setItem('outgunned_char', JSON.stringify(state));
-      showToast('Saved to cloud! ☁️');
-      updateSaveStatus();
-    } else {
-      showToast('Save failed — try again');
-    }
-  } else {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Characters`, {
-      method: 'POST',
-      headers: { ...HEADERS, 'Prefer': 'return=representation' },
-      body: JSON.stringify(payload),
-    });
-    if(res.ok) {
-      const data = await res.json();
-      state.cloudId = data[0].id;
-      gatherState();
-      localStorage.setItem('outgunned_char', JSON.stringify(state));
-      const shareUrl = window.location.origin + window.location.pathname + '?id=' + state.cloudId;
-      showToast('Saved! Share link copied ✅');
-      navigator.clipboard.writeText(shareUrl).catch(()=>{});
-      updateSaveStatus();
-    } else {
-      showToast('Save failed — try again');
-    }
-  }
-}
-
-async function loadFromCloud(id) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/Characters?id=eq.${id}`, {
-    headers: HEADERS,
-  });
-  if(!res.ok) return;
-  const data = await res.json();
-  if(!data.length) return;
-  const row = data[0];
-  const parsed = JSON.parse(row.data);
-  parsed.portrait = row.portrait;
-  parsed.cloudId = row.id;
-  state = parsed;
-  applyState();
-  applyPortrait();
-  showToast('Character loaded! 🎬');
-}
-
-function updateSaveStatus() {
-  saved = true;
-  document.getElementById('saveStatus').textContent = '● SAVED TO CLOUD';
-  document.getElementById('saveStatus').className = 'save-status saved';
-}
-
-// Check URL for shared character
-const urlId = new URLSearchParams(window.location.search).get('id');
-
-// ===== PORTRAIT =====
-function loadPortrait(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    state.portrait = e.target.result;
-    applyPortrait();
-    markUnsaved();
-  };
-  reader.readAsDataURL(file);
-}
-
-function applyPortrait() {
-  const img = document.getElementById('portraitImg');
-  const placeholder = document.getElementById('portraitPlaceholder');
-  if(state.portrait) {
-    img.src = state.portrait;
-    img.style.display = 'block';
-    placeholder.style.display = 'none';
-  } else {
-    img.style.display = 'none';
-    placeholder.style.display = 'flex';
-  }
-}
-
-function removePortrait(e) {
-  e.stopPropagation();
-  state.portrait = null;
-  document.getElementById('portraitInput').value = '';
-  applyPortrait();
-  markUnsaved();
-}
-
-// ===== DATA =====
-const ATTRIBUTES = [
-  { key: 'brawn',  name: 'BRAWN',  skills: ['Endure','Fight','Force','Stunt','Survival'] },
-  { key: 'nerves', name: 'NERVES', skills: ['Cool','Drive','Shoot'] },
-  { key: 'smooth', name: 'SMOOTH', skills: ['Flirt','Leadership','Speech','Style'] },
-  { key: 'focus',  name: 'FOCUS',  skills: ['Detect','Fix','Heal','Know'] },
-  { key: 'crime',  name: 'CRIME',  skills: ['Awareness','Dexterity','Stealth','Streetwise'] },
+const ATTRS=[
+  {key:'brawn', name:'BRAWN', skills:['Endure','Fight','Force','Stunt']},
+  {key:'nerves',name:'NERVES',skills:['Cool','Drive','Shoot','Survival']},
+  {key:'smooth',name:'SMOOTH',skills:['Flirt','Leadership','Speech','Style']},
+  {key:'focus', name:'FOCUS', skills:['Detect','Fix','Heal','Know']},
+  {key:'crime', name:'CRIME', skills:['Awareness','Dexterity','Stealth','Streetwise']},
 ];
 
-const STATUSES = ['Bleeding','Pinned Down','Panicked','Stunned','Burning','Poisoned','Blinded','Disarmed'];
+const CONDS=[
+  {n:'HURT',a:'BRAWN',   pn:'TIRED',  pa:'NONE'},
+  {n:'NERVOUS',a:'NERVES',pn:'—',      pa:'OTHER'},
+  {n:'LIKE A FOOL',a:'SMOOTH',pn:'—',  pa:'OTHER'},
+  {n:'DISTRACTED',a:'FOCUS',pn:'—',    pa:'OTHER'},
+  {n:'SCARED',a:'CRIME',  pn:'BROKEN', pa:'ALL'},
+];
 
-let state = {
-  heroName:'', role:'', trope:'', age:'', player:'', catchphrase:'', portrait:null,
-  attrs: { brawn:0, nerves:0, smooth:0, focus:0, crime:0 },
-  skills: {},
-  grit: 0,
-  heroDice: 0,
-  flashbacks: 0,
-  statuses: [],
-  moves: [],
-  feats: [],
-  gear: [],
-  contacts: [],
+let S={
+  heroName:'',role:'',trope:'',job:'',age:'',flaw:'',catchphrase:'',player:'',portrait:null,
+  mission:'',exps:['','','',''],spotlight:false,
+  attrs:{brawn:1,nerves:1,smooth:1,focus:1,crime:1},skills:{},
+  adrenaline:1,grit:0,conds:Array(10).fill(false),death:'1',
+  cash:0,storage:'',rideName:'',rideSpeed:0,
+  feats:[],gear:[],contacts:[],cloudId:null,
 };
+let saved=true;
 
-let saved = true;
+function buildAll(){buildAttrs();buildAdr();buildGrit();buildConds();buildDeath();buildCash();buildSpeed();buildExpLines();}
 
-// ===== INIT =====
-function init() {
-  buildAttrGrid();
-  buildGritTrack();
-  buildHeroDiceTrack();
-  buildFlashbackTrack();
-  buildStatusGrid();
-  loadData();
-}
-
-function buildAttrGrid() {
-  const grid = document.getElementById('attrGrid');
-  grid.innerHTML = '';
-  ATTRIBUTES.forEach(attr => {
-    const block = document.createElement('div');
-    block.className = 'attr-block';
-    block.innerHTML = `
-      <div class="attr-name">
-        ${attr.name}
-        <input type="number" class="attr-score" id="attr_${attr.key}" min="0" max="6" value="0" oninput="markUnsaved()">
-      </div>
-      <div class="skills-list">
-        ${attr.skills.map(s => `
-          <div class="skill-row">
-            <input type="number" class="skill-score" id="skill_${s.replace(/\s/g,'_')}" min="0" max="6" value="0" oninput="markUnsaved()">
-            <span class="skill-name">${s}</span>
-          </div>
-        `).join('')}
-      </div>`;
-    grid.appendChild(block);
+function buildAttrs(){
+  const sec=document.getElementById('attrSection');sec.innerHTML='';
+  ATTRS.forEach(a=>{
+    const b=document.createElement('div');b.className='attr-block';
+    const pips=[1,2,3].map(i=>`<div class="ap" data-a="${a.key}" data-i="${i}" onclick="tapA('${a.key}',${i})"></div>`).join('');
+    const shtml=a.skills.map(s=>{
+      const k=s.replace(/\s/g,'_');
+      const sp=[1,2,3].map(i=>`<div class="sp" data-s="${k}" data-i="${i}" onclick="tapS('${k}',${i})"></div>`).join('');
+      return `<div class="sk-row"><span class="sk-name">${s}</span><div class="sk-pips">${sp}</div></div>`;
+    }).join('');
+    b.innerHTML=`<div class="attr-hd">${a.name}<div class="attr-pips">${pips}</div></div><div class="skill-rows">${shtml}</div>`;
+    sec.appendChild(b);
   });
 }
 
-function buildGritTrack() {
-  const track = document.getElementById('gritTrack');
-  track.innerHTML = '';
-  for(let i=1; i<=10; i++) {
-    const box = document.createElement('div');
-    box.className = 'grit-box';
-    box.dataset.i = i;
-    box.onclick = () => toggleGrit(i);
-    track.appendChild(box);
+function buildAdr(){
+  const t=document.getElementById('adrTrack');t.innerHTML='';
+  for(let i=1;i<=6;i++){
+    const d=document.createElement('div');d.className='adr-pip';
+    d.dataset.i=i;d.textContent=i;d.onclick=()=>tapAdr(i);t.appendChild(d);
   }
 }
 
-function buildHeroDiceTrack() {
-  const track = document.getElementById('heroDiceTrack');
-  track.innerHTML = '';
-  for(let i=1; i<=6; i++) {
-    const die = document.createElement('div');
-    die.className = 'die';
-    die.dataset.i = i;
-    die.textContent = i;
-    die.onclick = () => toggleDie('heroDice', i);
-    track.appendChild(die);
+function buildGrit(){
+  const t=document.getElementById('gritTrack');t.innerHTML='';
+  for(let i=1;i<=12;i++){
+    const d=document.createElement('div');
+    if(i===8){d.className='gp bad';d.innerHTML='<span style="font-size:10px;pointer-events:none;">✕</span>';}
+    else if(i===12){d.className='gp hot';d.innerHTML='<span style="font-size:10px;pointer-events:none;">🔥</span>';}
+    else{d.className='gp'+(i<8?'':' bad');d.textContent='';}
+    d.dataset.i=i;d.onclick=()=>tapGrit(i);t.appendChild(d);
   }
 }
 
-function buildFlashbackTrack() {
-  const track = document.getElementById('flashbackTrack');
-  track.innerHTML = '';
-  for(let i=1; i<=3; i++) {
-    const die = document.createElement('div');
-    die.className = 'die';
-    die.dataset.i = i;
-    die.textContent = i;
-    die.onclick = () => toggleDie('flashbacks', i);
-    track.appendChild(die);
-  }
-}
-
-function buildStatusGrid() {
-  const grid = document.getElementById('statusGrid');
-  grid.innerHTML = '';
-  STATUSES.forEach(s => {
-    const chip = document.createElement('div');
-    chip.className = 'status-chip';
-    chip.textContent = s;
-    chip.dataset.status = s;
-    chip.onclick = () => toggleStatus(s, chip);
-    grid.appendChild(chip);
-  });
-}
-
-// ===== GRIT =====
-function toggleGrit(i) {
-  if(state.grit >= i) { state.grit = i-1; }
-  else { state.grit = i; }
-  renderGrit();
-  markUnsaved();
-}
-function renderGrit() {
-  document.querySelectorAll('.grit-box').forEach(b => {
-    b.classList.toggle('filled', parseInt(b.dataset.i) <= state.grit);
-  });
-  document.getElementById('gritLabel').textContent = `${state.grit} / 10`;
-}
-
-// ===== DICE =====
-function toggleDie(type, i) {
-  if(state[type] >= i) state[type] = i-1;
-  else state[type] = i;
-  renderDice();
-  markUnsaved();
-}
-function renderDice() {
-  document.querySelectorAll('#heroDiceTrack .die').forEach(d => {
-    const i = parseInt(d.dataset.i);
-    d.classList.toggle('active', i <= state.heroDice);
-    d.classList.toggle('used', i > state.heroDice);
-  });
-  document.querySelectorAll('#flashbackTrack .die').forEach(d => {
-    const i = parseInt(d.dataset.i);
-    d.classList.toggle('active', i <= state.flashbacks);
-  });
-}
-
-// ===== STATUS =====
-function toggleStatus(s, chip) {
-  if(state.statuses.includes(s)) {
-    state.statuses = state.statuses.filter(x=>x!==s);
-    chip.classList.remove('active');
-  } else {
-    state.statuses.push(s);
-    chip.classList.add('active');
-  }
-  markUnsaved();
-}
-
-// ===== GEAR =====
-function addGear(val='') {
-  const list = document.getElementById('gearList');
-  const id = Date.now();
-  const row = document.createElement('div');
-  row.className = 'gear-item';
-  row.dataset.id = id;
-  row.innerHTML = `
-    <input type="text" placeholder="e.g. Custom Shotgun — +1 Range" value="${val}" oninput="markUnsaved()">
-    <button class="gear-delete" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
-  list.appendChild(row);
-}
-
-function addMove(val='') {
-  const list = document.getElementById('movesList');
-  const row = document.createElement('div');
-  row.className = 'gear-item';
-  row.innerHTML = `
-    <input type="text" placeholder="e.g. Rolling Thunder — dive and shoot" value="${val}" oninput="markUnsaved()">
-    <button class="gear-delete" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
-  list.appendChild(row);
-}
-
-// ===== FEATS =====
-function addFeat(name='', desc='') {
-  const list = document.getElementById('featList');
-  const row = document.createElement('div');
-  row.className = 'feat-item';
-  row.innerHTML = `
-    <input type="text" class="feat-name" placeholder="Feat name" value="${name}" oninput="markUnsaved()">
-    <input type="text" class="feat-desc" placeholder="Description / effect" value="${desc}" oninput="markUnsaved()">
-    <button class="gear-delete" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
-  list.appendChild(row);
-}
-
-// ===== CONTACTS =====
-function addContact(type='Ally', name='', desc='') {
-  const list = document.getElementById('contactList');
-  const row = document.createElement('div');
-  row.className = 'contact-item';
-  const badgeClass = type==='Ally'?'badge-ally':type==='Rival'?'badge-rival':'badge-contact';
-  row.innerHTML = `
-    <div class="field">
-      <span class="contact-type-badge ${badgeClass}">${type}</span>
-      <input type="text" placeholder="Name" value="${name}" oninput="markUnsaved()">
-    </div>
-    <div></div>
-    <div class="field">
-      <label>Notes</label>
-      <input type="text" placeholder="Who are they?" value="${desc}" oninput="markUnsaved()">
-    </div>
-    <button class="gear-delete" style="align-self:end" onclick="this.parentElement.remove();markUnsaved()">✕</button>`;
-  list.appendChild(row);
-}
-
-// ===== SAVE / LOAD =====
-function gatherState() {
-  state.heroName = document.getElementById('heroName').value;
-  state.role = document.getElementById('role').value;
-  state.trope = document.getElementById('trope').value;
-  state.age = document.getElementById('age').value;
-  state.player = document.getElementById('player').value;
-  state.catchphrase = document.getElementById('catchphrase').value;
-
-  ATTRIBUTES.forEach(attr => {
-    state.attrs[attr.key] = parseInt(document.getElementById(`attr_${attr.key}`)?.value)||0;
-    attr.skills.forEach(s => {
-      const key = s.replace(/\s/g,'_');
-      state.skills[key] = parseInt(document.getElementById(`skill_${key}`)?.value)||0;
+function buildConds(){
+  const g=document.getElementById('condGrid');g.innerHTML='';
+  CONDS.forEach((c,idx)=>{
+    [0,1].forEach(side=>{
+      const ci=idx*2+side,nm=side===0?c.n:c.pn,at=side===0?c.a:c.pa;
+      const d=document.createElement('div');d.className='cond-item';
+      d.innerHTML=`<div class="cc" data-i="${ci}" onclick="tapCond(${ci})"></div><span class="cn">${nm}</span><span class="ca"> ◇ ${at}</span>`;
+      g.appendChild(d);
     });
   });
+}
 
-  state.moves = [...document.querySelectorAll('#movesList input[type=text]')].map(i=>i.value);
-  state.feats = [...document.querySelectorAll('#featList .feat-item')].map(row=>({
-    name: row.querySelector('.feat-name').value,
-    desc: row.querySelector('.feat-desc').value,
-  }));
-  state.gear = [...document.querySelectorAll('#gearList input[type=text]')].map(i=>i.value);
-  state.contacts = [...document.querySelectorAll('#contactList .contact-item')].map(row=>{
-    const badge = row.querySelector('.contact-type-badge');
-    const inputs = row.querySelectorAll('input');
-    return { type: badge.textContent, name: inputs[0].value, desc: inputs[1].value };
+function buildDeath(){
+  const t=document.getElementById('deathTrack');t.innerHTML='';
+  [1,2,3,4,5,6,'💀'].forEach(v=>{
+    const d=document.createElement('div');
+    d.className='dr-pip'+(v==='💀'?' skull-pip':'');
+    d.textContent=v;d.dataset.v=String(v);
+    d.onclick=()=>tapDeath(String(v));t.appendChild(d);
   });
 }
 
-function saveData() {
-  gatherState();
-  localStorage.setItem('outgunned_char', JSON.stringify(state));
-  saved = true;
-  document.getElementById('saveStatus').textContent = '● SAVED';
-  document.getElementById('saveStatus').className = 'save-status saved';
-  showToast('Character saved!');
+function buildCash(){
+  const t=document.getElementById('cashTrack');t.innerHTML='';
+  for(let i=1;i<=5;i++){const p=document.createElement('div');p.className='cash-pip';p.dataset.i=i;p.onclick=()=>tapCash(i);t.appendChild(p);}
 }
 
-function loadData() {
-  const raw = localStorage.getItem('outgunned_char');
-  if(!raw) return;
-  try {
-    state = JSON.parse(raw);
-    applyState();
-  } catch(e) { console.error(e); }
-}
-
-function applyState() {
-  document.getElementById('heroName').value = state.heroName||'';
-  document.getElementById('role').value = state.role||'';
-  document.getElementById('trope').value = state.trope||'';
-  document.getElementById('age').value = state.age||'';
-  document.getElementById('player').value = state.player||'';
-  document.getElementById('catchphrase').value = state.catchphrase||'';
-  applyPortrait();
-
-  ATTRIBUTES.forEach(attr => {
-    const el = document.getElementById(`attr_${attr.key}`);
-    if(el) el.value = state.attrs?.[attr.key]||0;
-    attr.skills.forEach(s => {
-      const key = s.replace(/\s/g,'_');
-      const sel = document.getElementById(`skill_${key}`);
-      if(sel) sel.value = state.skills?.[key]||0;
-    });
+function buildSpeed(){
+  const t=document.getElementById('speedTrack');t.innerHTML='';
+  [-3,-2,-1,0,1,2,3].forEach(v=>{
+    const d=document.createElement('div');
+    d.className='spd-pip'+(v<0?' neg':v>0?' pos':' center');
+    d.textContent=v===0?'0':(v>0?'+'+v:v);
+    d.dataset.v=v;d.onclick=()=>tapSpeed(v);t.appendChild(d);
   });
+}
 
-  renderGrit();
-  renderDice();
+function buildExpLines(){
+  const el=document.getElementById('expLines');el.innerHTML='';
+  for(let i=0;i<4;i++){
+    const inp=document.createElement('input');inp.className='exp-inp';inp.placeholder='';
+    inp.dataset.i=i;inp.oninput=()=>{S.exps[i]=inp.value;mu();};el.appendChild(inp);
+  }
+}
 
-  // statuses
-  document.querySelectorAll('.status-chip').forEach(chip => {
-    const active = (state.statuses||[]).includes(chip.dataset.status);
-    chip.classList.toggle('active', active);
+// interactions
+function tapA(k,i){S.attrs[k]=S.attrs[k]>=i?i-1:i;renderAttrs();mu();}
+function tapS(k,i){S.skills[k]=(S.skills[k]||0)>=i?i-1:i;renderAttrs();mu();}
+function renderAttrs(){
+  ATTRS.forEach(a=>{
+    for(let i=1;i<=3;i++){const p=document.querySelector(`.ap[data-a="${a.key}"][data-i="${i}"]`);if(p)p.classList.toggle('on',i<=S.attrs[a.key]);}
+    a.skills.forEach(s=>{const k=s.replace(/\s/g,'_');for(let i=1;i<=3;i++){const p=document.querySelector(`.sp[data-s="${k}"][data-i="${i}"]`);if(p)p.classList.toggle('on',i<=(S.skills[k]||0));}});
   });
+}
+function tapAdr(i){S.adrenaline=S.adrenaline>=i?i-1:i;document.querySelectorAll('.adr-pip').forEach(d=>d.classList.toggle('on',parseInt(d.dataset.i)<=S.adrenaline));mu();}
+function tapGrit(i){S.grit=S.grit>=i?i-1:i;document.querySelectorAll('.gp').forEach(p=>p.classList.toggle('on',parseInt(p.dataset.i)<=S.grit));mu();}
+function tapCond(i){S.conds[i]=!S.conds[i];document.querySelector(`.cc[data-i="${i}"]`)?.classList.toggle('on',S.conds[i]);mu();}
+function tapDeath(v){S.death=S.death===v?null:v;document.querySelectorAll('.dr-pip').forEach(d=>d.classList.toggle('on',d.dataset.v===v&&S.death===v));mu();}
+function tapCash(i){S.cash=S.cash>=i?i-1:i;document.querySelectorAll('.cash-pip').forEach(p=>p.classList.toggle('on',parseInt(p.dataset.i)<=S.cash));mu();}
+function tapSpeed(v){S.rideSpeed=S.rideSpeed===v?null:v;document.querySelectorAll('.spd-pip').forEach(p=>p.classList.toggle('on',parseInt(p.dataset.v)===S.rideSpeed));mu();}
+function toggleSpotlight(){S.spotlight=!S.spotlight;document.getElementById('spotlightInner').classList.toggle('on',S.spotlight);mu();}
 
-  // moves
-  document.getElementById('movesList').innerHTML = '';
-  (state.moves||[]).forEach(v => addMove(v));
-
-  // feats
-  document.getElementById('featList').innerHTML = '';
-  (state.feats||[]).forEach(f => addFeat(f.name, f.desc));
-
-  // gear
-  document.getElementById('gearList').innerHTML = '';
-  (state.gear||[]).forEach(v => addGear(v));
-
-  // contacts
-  document.getElementById('contactList').innerHTML = '';
-  (state.contacts||[]).forEach(c => addContact(c.type, c.name, c.desc));
-
-  saved = true;
-  document.getElementById('saveStatus').textContent = '● SAVED';
-  document.getElementById('saveStatus').className = 'save-status saved';
+// lists
+function addFeat(n='',d=''){
+  const l=document.getElementById('featsList'),r=document.createElement('div');r.className='feat-item';
+  r.innerHTML=`<input class="feat-n" placeholder="FEAT NAME" value="${n}" oninput="mu()"><input class="feat-d" placeholder="effect..." value="${d}" oninput="mu()"><button class="del" onclick="this.parentElement.remove();mu()">✕</button>`;
+  l.appendChild(r);
+}
+function addGear(n='',m='',c='',md='',lg=''){
+  const l=document.getElementById('gearList'),r=document.createElement('div');r.className='gear-item';
+  r.innerHTML=`<input class="gear-n" placeholder="WEAPON / ITEM" value="${n}" oninput="mu()">
+    <input class="rng" value="${m}" placeholder="-" oninput="mu()"><input class="rng" value="${c}" placeholder="-" oninput="mu()">
+    <input class="rng" value="${md}" placeholder="-" oninput="mu()"><input class="rng" value="${lg}" placeholder="-" oninput="mu()">
+    <button class="del" onclick="this.parentElement.remove();mu()">✕</button>`;
+  l.appendChild(r);
+}
+function addContact(t='Ally',n='',no=''){
+  const l=document.getElementById('contactsList'),r=document.createElement('div');r.className='contact-item';
+  const cls=t==='Ally'?'b-ally':t==='Rival'?'b-rival':'b-contact';
+  r.innerHTML=`<span class="cbadge ${cls}">${t}</span>
+    <input class="contact-inp" placeholder="Name" value="${n}" oninput="mu()">
+    <input class="contact-inp notes" placeholder="Notes..." value="${no}" oninput="mu()">
+    <button class="del" onclick="this.parentElement.remove();mu()">✕</button>`;
+  l.appendChild(r);
 }
 
-function clearData() {
-  if(!confirm('Start a new character? Current data will be cleared.')) return;
-  localStorage.removeItem('outgunned_char');
-  location.reload();
+// portrait
+function loadPortrait(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.portrait=ev.target.result;applyPortrait();mu();};r.readAsDataURL(f);}
+function applyPortrait(){
+  const img=document.getElementById('portraitImg'),ph=document.getElementById('portraitPh');
+  if(S.portrait){img.src=S.portrait;img.style.display='block';ph.style.display='none';}
+  else{img.style.display='none';ph.style.display='flex';}
+}
+function removePortrait(e){e.stopPropagation();S.portrait=null;document.getElementById('pi').value='';applyPortrait();mu();}
+
+// role modal
+function showRoleModal(){
+  const rn=document.getElementById('role').value;if(!rn){showToast('Select a Role first');return;}
+  const role=ROLES[rn];if(!role)return;
+  const old=document.getElementById('rm');if(old)old.remove();
+  const ov=document.createElement('div');ov.className='modal-ov';ov.id='rm';ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  ov.innerHTML=`<div class="modal-box"><button onclick="document.getElementById('rm').remove()" style="position:absolute;top:10px;right:10px;background:none;border:1px solid #ccc;cursor:pointer;padding:2px 8px;font-size:12px;">✕</button>
+    <div class="modal-ttl">${rn.toUpperCase()}</div>
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Key Attribute: <strong style="color:var(--red);">${role.attr}</strong></div>
+    <div class="modal-st">Skills</div><div class="tag-list">${role.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
+    <div class="modal-st">Feats (Choose 2)</div><div class="tag-list">${role.feats.map(f=>`<span class="tag">${f}</span>`).join('')}</div>
+    <div class="modal-st">Starting Gear</div>${role.gear.map(g=>`<div style="font-size:12px;color:var(--ink);padding:2px 0;">▸ ${g}</div>`).join('')}
+  </div>`;
+  document.body.appendChild(ov);
 }
 
-function exportData() {
-  gatherState();
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${state.heroName||'character'}.json`;
-  a.click();
+// gather & apply
+function gather(){
+  ['heroName','role','trope','job','flaw','catchphrase','player','mission','storage','rideName'].forEach(id=>{const el=document.getElementById(id);if(el)S[id]=el.value;});
+  S.age=document.getElementById('age').value;
+  S.exps=[...document.querySelectorAll('.exp-inp')].map(i=>i.value);
+  S.feats=[...document.querySelectorAll('#featsList .feat-item')].map(r=>({n:r.querySelector('.feat-n').value,d:r.querySelector('.feat-d').value}));
+  S.gear=[...document.querySelectorAll('#gearList .gear-item')].map(r=>{const inp=r.querySelectorAll('input');return{n:inp[0].value,m:inp[1].value,c:inp[2].value,md:inp[3].value,lg:inp[4].value};});
+  S.contacts=[...document.querySelectorAll('#contactsList .contact-item')].map(r=>{const b=r.querySelector('.cbadge');const inp=r.querySelectorAll('input');return{t:b.textContent,n:inp[0].value,no:inp[1].value};});
 }
 
-function markUnsaved() {
-  saved = false;
-  document.getElementById('saveStatus').textContent = '● UNSAVED';
-  document.getElementById('saveStatus').className = 'save-status unsaved';
+function applyState(){
+  ['heroName','role','trope','job','flaw','catchphrase','player','mission','storage','rideName'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=S[id]||'';});
+  document.getElementById('age').value=S.age||'';
+  applyPortrait();renderAttrs();
+  document.querySelectorAll('.adr-pip').forEach(d=>d.classList.toggle('on',parseInt(d.dataset.i)<=(S.adrenaline||0)));
+  document.querySelectorAll('.gp').forEach(p=>p.classList.toggle('on',parseInt(p.dataset.i)<=(S.grit||0)));
+  document.querySelectorAll('.cc').forEach(c=>c.classList.toggle('on',(S.conds||[])[parseInt(c.dataset.i)]||false));
+  document.querySelectorAll('.cash-pip').forEach(p=>p.classList.toggle('on',parseInt(p.dataset.i)<=(S.cash||0)));
+  document.getElementById('spotlightInner').classList.toggle('on',S.spotlight||false);
+  document.querySelectorAll('.exp-inp').forEach((inp,i)=>{inp.value=(S.exps||[])[i]||'';});
+  if(S.death)document.querySelectorAll('.dr-pip').forEach(d=>d.classList.toggle('on',d.dataset.v===String(S.death)));
+  if(S.rideSpeed!=null)document.querySelectorAll('.spd-pip').forEach(p=>p.classList.toggle('on',parseInt(p.dataset.v)===S.rideSpeed));
+  document.getElementById('featsList').innerHTML='';(S.feats||[]).forEach(f=>addFeat(f.n,f.d));
+  document.getElementById('gearList').innerHTML='';(S.gear||[]).forEach(g=>addGear(g.n,g.m,g.c,g.md,g.lg));
+  document.getElementById('contactsList').innerHTML='';(S.contacts||[]).forEach(c=>addContact(c.t,c.n,c.no));
+  saved=true;document.getElementById('saveStatus').textContent='● SAVED';document.getElementById('saveStatus').className='save-st saved';
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
+// cloud
+async function saveToCloud(){
+  gather();
+  const{portrait,...rest}=S;
+  const payload={name:S.heroName||'Unnamed',data:JSON.stringify(rest),portrait:S.portrait||''};
+  if(S.cloudId){
+    const res=await fetch(`${SB_URL}/rest/v1/Characters?id=eq.${S.cloudId}`,{method:'PATCH',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+    if(res.ok){gather();localStorage.setItem('og_char',JSON.stringify(S));showToast('Saved to cloud! ☁️');updateSaved();}else showToast('Save failed');
+  }else{
+    const res=await fetch(`${SB_URL}/rest/v1/Characters`,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+    if(res.ok){const d=await res.json();S.cloudId=d[0].id;gather();localStorage.setItem('og_char',JSON.stringify(S));navigator.clipboard.writeText(location.origin+location.pathname+'?id='+S.cloudId).catch(()=>{});showToast('Saved! Link copied ✅');updateSaved();}else showToast('Save failed');
+  }
+}
+async function loadFromCloud(id){
+  const res=await fetch(`${SB_URL}/rest/v1/Characters?id=eq.${id}`,{headers:H});
+  if(!res.ok)return;const d=await res.json();if(!d.length)return;
+  const row=d[0];const p=JSON.parse(row.data);p.portrait=row.portrait;p.cloudId=row.id;S=p;applyState();showToast('Character loaded! 🎬');
+}
+function saveData(){gather();localStorage.setItem('og_char',JSON.stringify(S));updateSaved();showToast('Saved locally!');}
+function loadData(){const raw=localStorage.getItem('og_char');if(!raw)return;try{S=JSON.parse(raw);applyState();}catch(e){}}
+function clearData(){if(!confirm('Start a new character?'))return;localStorage.removeItem('og_char');location.reload();}
+function exportData(){gather();const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(S.heroName||'character')+'.json';a.click();}
+function updateSaved(){saved=true;document.getElementById('saveStatus').textContent='● SAVED TO CLOUD';document.getElementById('saveStatus').className='save-st saved';}
+function mu(){saved=false;document.getElementById('saveStatus').textContent='● UNSAVED';document.getElementById('saveStatus').className='save-st unsaved';}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+window.addEventListener('beforeunload',e=>{if(!saved){e.preventDefault();e.returnValue='';}});
+
+// init with default trackers
+function initDefaults(){
+  const raw=localStorage.getItem('og_char');
+  if(raw){loadData();return;}
+  // defaults: attr=1, adr=1, death=1, grit=0
+  renderAttrs();
+  document.querySelectorAll('.adr-pip').forEach(d=>d.classList.toggle('on',parseInt(d.dataset.i)<=1));
+  document.querySelectorAll('.dr-pip').forEach(d=>d.classList.toggle('on',d.dataset.v==='1'));
+  mu();
 }
 
-window.addEventListener('beforeunload', e => {
-  if(!saved) { e.preventDefault(); e.returnValue=''; }
-});
-
-// Pre-fill JJ the Edge if no saved data
-function prefillJJ() {
-  const raw = localStorage.getItem('outgunned_char');
-  if(raw) { return; }
-
-  // Identity
-  document.getElementById('heroName').value = 'Eng Jia Jian (JJ the Edge)';
-  document.getElementById('role').value = 'The Fighter';
-  document.getElementById('trope').value = 'Bad to the Bone';
-  document.getElementById('age').value = 'Adult';
-  document.getElementById('player').value = '';
-  document.getElementById('catchphrase').value = '"เตรียมตัวลงนรกไว้เลย"';
-
-  // Portrait: user can upload manually
-
-  // Attributes & Skills — ตรงกับชีทของกลุ่มเลย
-  document.getElementById('attr_brawn').value = 3;
-  document.getElementById('skill_Endure').value = 3;
-  document.getElementById('skill_Fight').value = 3;
-  document.getElementById('skill_Force').value = 3;
-  document.getElementById('skill_Stunt').value = 3;
-  document.getElementById('skill_Survival').value = 2;
-
-  document.getElementById('attr_nerves').value = 3;
-  document.getElementById('skill_Cool').value = 3;
-  document.getElementById('skill_Drive').value = 3;
-  document.getElementById('skill_Shoot').value = 3;
-
-  document.getElementById('attr_smooth').value = 2;
-  document.getElementById('skill_Flirt').value = 3;
-  document.getElementById('skill_Leadership').value = 3;
-  document.getElementById('skill_Speech').value = 2;
-  document.getElementById('skill_Style').value = 3;
-
-  document.getElementById('attr_focus').value = 2;
-  document.getElementById('skill_Detect').value = 2;
-  document.getElementById('skill_Fix').value = 2;
-  document.getElementById('skill_Heal').value = 3;
-  document.getElementById('skill_Know').value = 2;
-
-  document.getElementById('attr_crime').value = 2;
-  document.getElementById('skill_Awareness').value = 2;
-  document.getElementById('skill_Dexterity').value = 3;
-  document.getElementById('skill_Stealth').value = 2;
-  document.getElementById('skill_Streetwise').value = 3;
-
-  // Grit — 3 filled (◉◉◉ on Brawn row)
-  state.grit = 6;
-  renderGrit();
-
-  // Feats
-  addFeat('Martial Arts', 'Gain a Free Re-roll for all Action and Reaction Rolls made when fighting in melee.');
-  addFeat('Combo [⚡]', 'After hitting an Enemy, spend 1 Adrenaline to deal 1 additional Grit. Can chain for more.');
-  addFeat('Parkour', 'Gain a Free Re-roll when jumping, performing feats of acrobatics, or breaking a fall.');
-
-  // Gear
-  addGear('Revolver');
-  addGear('Knife');
-
-  markUnsaved();
-}
-
-init();
-if(urlId) {
-  loadFromCloud(urlId);
-} else if(!localStorage.getItem('outgunned_char')) {
-  prefillJJ();
-}
+buildAll();
+const urlId=new URLSearchParams(location.search).get('id');
+if(urlId)loadFromCloud(urlId);
+else initDefaults();
 </script>
 </body>
 </html>
