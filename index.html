@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OUTGUNNED — Character Sheet</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -380,6 +381,57 @@ const SB_URL='https://mwmcbuwffswwfmjbrohx.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bWNidXdmZnN3d2ZtamJyb2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTczMzgsImV4cCI6MjA5MzI3MzMzOH0.kPHF5GrRo0P0XrAsgN-DezrqY3l9dQhNjMIvVX3sQQU';
 const H={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 
+// Supabase JS client for Realtime
+const sbClient = supabase.createClient(SB_URL, SB_KEY);
+
+// Realtime subscription
+let realtimeChannel = null;
+function subscribeRealtime(id) {
+  if(realtimeChannel) sbClient.removeChannel(realtimeChannel);
+  realtimeChannel = sbClient
+    .channel('character-'+id)
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'Characters',
+      filter: `id=eq.${id}`
+    }, payload => {
+      // Only update if this tab is NOT the owner (viewer mode)
+      if(isOwner) return;
+      const row = payload.new;
+      const parsed = JSON.parse(row.data);
+      parsed.portrait = row.portrait;
+      parsed.cloudId = row.id;
+      S = parsed;
+      applyState();
+      showToast('Sheet updated! 🔄');
+    })
+    .subscribe();
+}
+
+// Auto-save debounce (owner only)
+let autoSaveTimer = null;
+let isOwner = false;
+
+function autoSave() {
+  if(!isOwner || !S.cloudId) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(async () => {
+    gather();
+    const{portrait,...rest}=S;
+    const payload={name:S.heroName||'Unnamed',data:JSON.stringify(rest),portrait:S.portrait||''};
+    await fetch(`${SB_URL}/rest/v1/Characters?id=eq.${S.cloudId}`,{
+      method:'PATCH',
+      headers:{...H,'Prefer':'return=representation'},
+      body:JSON.stringify(payload)
+    });
+    localStorage.setItem('og_char',JSON.stringify(S));
+    document.getElementById('saveStatus').textContent='● SAVED TO CLOUD';
+    document.getElementById('saveStatus').className='save-st saved';
+    saved=true;
+  }, 1000);
+}
+
 const ROLES={
   'The Commando':{attr:'Brawn',skills:['Endure','Fight','Force','Cool','Shoot','Survival','Leadership','Fix','Awareness','Stealth'],feats:['Hard to Kill','Hunter','Intimidation','Marksman','Military Background',"That's All?"],gear:['Knife','Telephone or Radio','Weapon of your choice']},
   'The Fighter':{attr:'Brawn',skills:['Endure','Fight','Force','Stunt','Cool','Flirt','Leadership','Style','Heal','Dexterity'],feats:['Combo','Counter','Flying Kick','Hard to Kill','Martial Arts','Punch Reload'],gear:['One 1$ item of your choice']},
@@ -604,27 +656,66 @@ async function saveToCloud(){
     if(res.ok){gather();localStorage.setItem('og_char',JSON.stringify(S));showToast('Saved to cloud! ☁️');updateSaved();}else showToast('Save failed');
   }else{
     const res=await fetch(`${SB_URL}/rest/v1/Characters`,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(payload)});
-    if(res.ok){const d=await res.json();S.cloudId=d[0].id;gather();localStorage.setItem('og_char',JSON.stringify(S));navigator.clipboard.writeText(location.origin+location.pathname+'?id='+S.cloudId).catch(()=>{});showToast('Saved! Link copied ✅');updateSaved();}else showToast('Save failed');
+    if(res.ok){
+      const d=await res.json();S.cloudId=d[0].id;
+      isOwner=true;
+      localStorage.setItem('og_owner_'+S.cloudId, 'true');
+      gather();localStorage.setItem('og_char',JSON.stringify(S));
+      const url=location.origin+location.pathname+'?id='+S.cloudId;
+      navigator.clipboard.writeText(url).catch(()=>{});
+      showToast('Saved! Link copied ✅');updateSaved();
+      subscribeRealtime(S.cloudId);
+    }else showToast('Save failed');
   }
 }
 async function loadFromCloud(id){
   const res=await fetch(`${SB_URL}/rest/v1/Characters?id=eq.${id}`,{headers:H});
   if(!res.ok)return;const d=await res.json();if(!d.length)return;
-  const row=d[0];const p=JSON.parse(row.data);p.portrait=row.portrait;p.cloudId=row.id;S=p;applyState();showToast('Character loaded! 🎬');
+  const row=d[0];const p=JSON.parse(row.data);p.portrait=row.portrait;p.cloudId=row.id;S=p;
+  // Check if this browser is the owner
+  isOwner = localStorage.getItem('og_owner_'+id) === 'true';
+  applyState();
+  subscribeRealtime(id);
+  if(isOwner){
+    showToast('Your sheet loaded ✏️');
+    document.getElementById('saveStatus').textContent='● OWNER MODE';
+    document.getElementById('saveStatus').className='save-st saved';
+  } else {
+    showToast('Viewing sheet (read-only) 👁️');
+    document.getElementById('saveStatus').textContent='● VIEWING (read-only)';
+    document.getElementById('saveStatus').className='save-st';
+    // Disable editing for viewers
+    document.querySelectorAll('input,textarea,select').forEach(el=>{
+      el.setAttribute('readonly','true');
+      el.style.pointerEvents='none';
+    });
+    document.querySelectorAll('button:not(#viewOnlyOk)').forEach(el=>{
+      if(!el.classList.contains('portrait-del')) el.style.pointerEvents='none';
+    });
+  }
 }
 function saveData(){gather();localStorage.setItem('og_char',JSON.stringify(S));updateSaved();showToast('Saved locally!');}
 function loadData(){const raw=localStorage.getItem('og_char');if(!raw)return;try{S=JSON.parse(raw);applyState();}catch(e){}}
 function clearData(){if(!confirm('Start a new character?'))return;localStorage.removeItem('og_char');location.reload();}
 function exportData(){gather();const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(S.heroName||'character')+'.json';a.click();}
 function updateSaved(){saved=true;document.getElementById('saveStatus').textContent='● SAVED TO CLOUD';document.getElementById('saveStatus').className='save-st saved';}
-function mu(){saved=false;document.getElementById('saveStatus').textContent='● UNSAVED';document.getElementById('saveStatus').className='save-st unsaved';}
+function mu(){saved=false;document.getElementById('saveStatus').textContent='● UNSAVED';document.getElementById('saveStatus').className='save-st unsaved';autoSave();}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 window.addEventListener('beforeunload',e=>{if(!saved){e.preventDefault();e.returnValue='';}});
 
 // init with default trackers
 function initDefaults(){
   const raw=localStorage.getItem('og_char');
-  if(raw){loadData();return;}
+  if(raw){
+    loadData();
+    // If we have a cloudId, we're the owner
+    if(S.cloudId){
+      isOwner=true;
+      subscribeRealtime(S.cloudId);
+    }
+    return;
+  }
+  isOwner=true;
   // defaults: attr=1, adr=1, death=1, grit=0
   renderAttrs();
   document.querySelectorAll('.adr-pip').forEach(d=>d.classList.toggle('on',parseInt(d.dataset.i)<=1));
