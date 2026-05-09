@@ -469,8 +469,23 @@ let S={
   feats:[],gear:[],contacts:[],cloudId:null,
 };
 let saved=true;
-
-function buildAll(){buildAttrs();buildAdr();buildGrit();buildConds();buildDeath();buildCash();buildSpeed();buildExpLines();}
+function buildSpotlightTrack(){
+  const t=document.getElementById('spotlightTrack');if(!t)return;t.innerHTML='';
+  for(let i=1;i<=3;i++){
+    const p=document.createElement('div');
+    p.style.cssText='width:20px;height:20px;border:2px solid var(--red);border-radius:50%;cursor:pointer;transition:all 0.15s;flex-shrink:0;';
+    p.dataset.i=i;
+    p.onclick=()=>{S.spotlightCount=S.spotlightCount>=i?i-1:i;renderSpotlight();mu();};
+    t.appendChild(p);
+  }
+}
+function renderSpotlight(){
+  document.querySelectorAll('#spotlightTrack div').forEach(p=>{
+    p.style.background=parseInt(p.dataset.i)<=(S.spotlightCount||0)?'var(--red)':'transparent';
+  });
+  document.getElementById('spotlightInner').classList.toggle('on',(S.spotlightCount||0)>0);
+}
+function buildAll(){buildAttrs();buildAdr();buildGrit();buildConds();buildDeath();buildCash();buildSpeed();buildExpLines();buildSpotlightTrack();}
 
 function buildAttrs(){
   const sec=document.getElementById('attrSection');sec.innerHTML='';
