@@ -575,13 +575,6 @@ function renderVehicleStats(){
   document.querySelectorAll('[data-gi]').forEach(p=>p.style.background=parseInt(p.dataset.gi)<=(S.vehicleGrit||0)?'var(--red)':'transparent');
   document.querySelectorAll('[data-ai]').forEach(p=>p.style.background=parseInt(p.dataset.ai)<=(S.vehicleArmor||0)?'#2a7a2a':'transparent');
   const inp=document.getElementById('speedBaseInp');if(inp)inp.value=S.rideSpeedBase||'';
-}  const t=document.getElementById('speedTrack');t.innerHTML='';
-  [-3,-2,-1,0,1,2,3].forEach(v=>{
-    const d=document.createElement('div');
-    d.className='spd-pip'+(v<0?' neg':v>0?' pos':' center');
-    d.textContent=v===0?'0':(v>0?'+'+v:v);
-    d.dataset.v=v;d.onclick=()=>tapSpeed(v);t.appendChild(d);
-  });
 }
 
 function buildExpLines(){
