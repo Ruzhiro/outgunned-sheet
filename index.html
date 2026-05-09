@@ -536,39 +536,32 @@ function buildCash(){
 
 function buildSpeed(){
   const t=document.getElementById('speedTrack');t.innerHTML='';
-  [-3,-2,-1].forEach(v=>{
-    const d=document.createElement('div');
-    d.className='spd-pip neg';
-    d.textContent=v;d.dataset.v=v;
-    d.onclick=()=>tapSpeed(v);t.appendChild(d);
-  });
-  // Center: editable input
+  t.style.cssText='display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;';
+
+  // Grit Vehicle (red, left)
+  const gritWrap=document.createElement('div');
+  gritWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;';
+  gritWrap.innerHTML='<div style="font-size:9px;letter-spacing:1px;color:var(--red);text-transform:uppercase;font-weight:700;">Grit</div>';
+  const gritTrack=document.createElement('div');gritTrack.style.cssText='display:flex;gap:3px;';
+  for(let i=1;i<=3;i++){const p=document.createElement('div');p.style.cssText='width:16px;height:16px;border:2px solid var(--red);border-radius:50%;cursor:pointer;transition:all 0.1s;';p.dataset.gi=i;p.onclick=()=>{S.vehicleGrit=S.vehicleGrit>=i?i-1:i;renderVehicleStats();mu();};gritTrack.appendChild(p);}
+  gritWrap.appendChild(gritTrack);t.appendChild(gritWrap);
+
+  // Center: editable 0
   const center=document.createElement('div');
   center.className='spd-pip center';
+  center.style.cssText='width:28px;height:28px;border:2px solid var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Bebas Neue,sans-serif;font-size:13px;font-weight:700;';
   const inp=document.createElement('input');
-  inp.style.cssText='width:20px;background:transparent;border:none;outline:none;text-align:center;font-family:inherit;font-size:inherit;color:inherit;font-weight:700;';
+  inp.style.cssText='width:22px;background:transparent;border:none;outline:none;text-align:center;font-family:inherit;font-size:inherit;color:inherit;font-weight:700;';
   inp.placeholder='0';inp.id='speedBaseInp';
   inp.oninput=()=>{S.rideSpeedBase=inp.value;mu();};
   center.appendChild(inp);t.appendChild(center);
-  [1,2,3].forEach(v=>{
-    const d=document.createElement('div');
-    d.className='spd-pip pos';
-    d.textContent='+'+v;d.dataset.v=v;
-    d.onclick=()=>tapSpeed(v);t.appendChild(d);
-  });
-  // Grit Vehicle (red, left)
-  const gritWrap=document.createElement('div');
-  gritWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;margin-left:8px;';
-  gritWrap.innerHTML='<div style="font-size:9px;letter-spacing:1px;color:var(--red);text-transform:uppercase;font-weight:700;">Grit</div>';
-  const gritTrack=document.createElement('div');gritTrack.style.cssText='display:flex;gap:3px;';
-  for(let i=1;i<=3;i++){const p=document.createElement('div');p.style.cssText='width:14px;height:14px;border:2px solid var(--red);border-radius:50%;cursor:pointer;';p.dataset.gi=i;p.onclick=()=>{S.vehicleGrit=S.vehicleGrit>=i?i-1:i;renderVehicleStats();mu();};gritTrack.appendChild(p);}
-  gritWrap.appendChild(gritTrack);t.appendChild(gritWrap);
+
   // Armor Vehicle (green, right)
   const armorWrap=document.createElement('div');
-  armorWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;margin-left:4px;';
+  armorWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;';
   armorWrap.innerHTML='<div style="font-size:9px;letter-spacing:1px;color:#2a7a2a;text-transform:uppercase;font-weight:700;">Armor</div>';
   const armorTrack=document.createElement('div');armorTrack.style.cssText='display:flex;gap:3px;';
-  for(let i=1;i<=3;i++){const p=document.createElement('div');p.style.cssText='width:14px;height:14px;border:2px solid #2a7a2a;border-radius:50%;cursor:pointer;';p.dataset.ai=i;p.onclick=()=>{S.vehicleArmor=S.vehicleArmor>=i?i-1:i;renderVehicleStats();mu();};armorTrack.appendChild(p);}
+  for(let i=1;i<=3;i++){const p=document.createElement('div');p.style.cssText='width:16px;height:16px;border:2px solid #2a7a2a;border-radius:50%;cursor:pointer;transition:all 0.1s;';p.dataset.ai=i;p.onclick=()=>{S.vehicleArmor=S.vehicleArmor>=i?i-1:i;renderVehicleStats();mu();};armorTrack.appendChild(p);}
   armorWrap.appendChild(armorTrack);t.appendChild(armorWrap);
 }
 function renderVehicleStats(){
